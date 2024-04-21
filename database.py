@@ -21,7 +21,9 @@ class Database:
         cur.execute('''
             CREATE TABLE IF NOT EXISTS TaskBank (
                 bank_id SERIAL PRIMARY KEY,
-                bank_name VARCHAR(100)
+                user_id INTEGER,
+                bank_name VARCHAR(100),
+                FOREIGN KEY (user_id) REFERENCES "User" (user_id)
             )
         ''')
         self.conn.commit()
@@ -34,10 +36,12 @@ class Database:
         ''', (last_name, first_name, middle_name, email, login, password))
         self.conn.commit()
 
-    def add_data_bank(self, bank_name):
+
+    def add_data_bank(self, user_id, bank_name):
         cur = self.conn.cursor()
         cur.execute('''
-            INSERT INTO TaskBank (bank_name) 
-            VALUES (%s)
-        ''', (bank_name,))
+            INSERT INTO TaskBank (user_id, bank_name) 
+            VALUES (%s, %s)
+        ''', (user_id, bank_name,))
         self.conn.commit()
+
