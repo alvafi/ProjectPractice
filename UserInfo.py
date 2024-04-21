@@ -12,7 +12,7 @@ class UserInfo:
     def GetSurname(self) -> str:
         return self.__surname
 
-    def Getpatronymic(self) -> str:
+    def GetPatronymic(self) -> str:
         return self.__patronymic
 
     def GetEmail(self) -> str:
