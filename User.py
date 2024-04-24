@@ -2,9 +2,9 @@ import UserInfo
 
 class User:
 
-    def __init__(self, login : str, id : int, conf_flag : bool, password : str) -> None:
+    def __init__(self, login : str, user_id : int, conf_flag : bool, password : str) -> None:
         self.__login = login
-        self.__id = id
+        self.__user_id = user_id
         self.__user_info = UserInfo.UserInfo("", "", "", "")
         self.__conf_flag = conf_flag
         self.__password = password
@@ -16,7 +16,7 @@ class User:
         return self.__login
 
     def GetId(self) -> int:
-        return self.__id
+        return self.__user_id
 
     def GetConf_flag(self) -> bool:
         return self.__conf_flag
