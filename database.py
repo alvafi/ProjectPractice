@@ -67,7 +67,7 @@ class Database:
 
         self.conn.commit()
 
-    def add_data_user(self, last_name, first_name, middle_name, login, email, password):
+    def add_data_user(self, last_name, first_name, middle_name, email, login, password):
         cur = self.conn.cursor()
         cur.execute('''
             INSERT INTO "User" (last_name, first_name, middle_name, email, login, password) 
@@ -225,3 +225,12 @@ class Database:
             WHERE answer_id = %s
         ''', (answer_id,))
         self.conn.commit()
+
+    def select_user(self, user_login_or_email : str, user_password : str):
+        cur = self.conn.cursor()
+        cur.execute('''
+            SELECT count(*)
+            FROM "User"
+            where (login = %s OR email = %s) AND password = %s
+        ''', (user_login_or_email, user_login_or_email, user_password))
+        return cur.fetchone()[0]

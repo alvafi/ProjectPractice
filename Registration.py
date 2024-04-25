@@ -1,10 +1,10 @@
 # Тут импорт всех муодулей: хэширование, модуль для работы с файлами на компьюетере(в init_file используется)
 import hashlib
-import os
 import re
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import database
 
 """
 Объясняю:
@@ -14,46 +14,28 @@ login: str требует, чтобы в функцию передалась т�
 Хэширование надо для того, чтобы никто не смог зайти в файл и узнать все пароли, это как бонус к этому примеру.
 """
 
-
-def init_file():  # Инициализация файла, если этого не сделать програма вылетит м ошибкой, что файла нет
-    """Создает файл пользователей"""
-    if not os.path.exists('users.txt'):
-        with open('users.txt', 'w'):
-            pass
-
-
 def add_user(second_name: str, first_name: str, middle_name: str, email_address: str, login: str, password: str) -> bool:
-    """Добавляет пользователя в файл"""
-    with open('users.txt', 'r') as f:
-        users = f.read().splitlines()  # Считываем всех пользователей из файла
-    for user in users:
-        args = user.split(':')
-        if login == args[4]:  # Если логин уже есть, парль не проверяем, шанс взлома увеличится(кто-то мб узнает пароль)
-            return False  # Тут можно написать что угодно, будь то HTML статус(409 - conflict), либо просто фразу ошибки
-        
-    with open('users.txt', 'a') as f:
-        f.write(f'{second_name}:{first_name}:{middle_name}:{email_address}:{login}:{password}\n')  # Добавляем нового пользователя
+    """Добавляет пользователя в бд"""
+    try:
+        user_id = database.Database().add_data_user(second_name, first_name, middle_name, email_address, login, password)
+        print(user_id)
+    except Exception:
+        print("Ошибка")
+        return False
     return True
 
 
-def get_user(login: str, password: str) -> bool:
+def get_user(login_or_email: str, password: str) -> bool:
     """Проверяет логин и пароль пользователя"""
-    with open('users.txt', 'r') as f:
-        users = f.read().splitlines()  # Считываем всех пользователей из файла
-
-    for user in users:
-        args = user.split(':')
-        if login == args[4] and password == args[5]:  # Если пользователь с таким логином и паролем существует
-            return True
-    return False
+    if database.Database().select_user(login_or_email, password) == 0:
+        return False
+    return True
 
 
 def main_loop(login: str):
     """Главный цикл программы"""
     print(f'Привет, {login}!')  # Тут основная часть программы
 
-
-init_file()
 
 while True:
     print('''Добро пожаловать! Выберите пункт меню:
@@ -128,7 +110,7 @@ while True:
             else:
                 print('Регистрация прошла успешно!')
     elif user_input == '1':
-        print('Введите логин:')
+        print('Введите логин или почта:')
         login = input()
 
         print('Введите пароль:')
