@@ -1,21 +1,22 @@
 import psycopg2
-import config as cfg
+import sqlite3
+import Config as cfg
 
 class Database:
     def __init__(self):
-        self.conn = psycopg2.connect(database=cfg.db_name, user=cfg.db_user, host=cfg.db_host, password=cfg.db_password)
+        self.__conn = psycopg2.connect(database = cfg.db_name, user = cfg.db_user,  password = cfg.db_password, host = cfg.db_host)
 
     def create_db(self):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
-            CREATE TABLE IF NOT EXISTS "User" (
+            CREATE TABLE IF NOT EXISTS Users (
                 user_id SERIAL PRIMARY KEY,
-                last_name VARCHAR(20),
-                first_name VARCHAR(20),
-                middle_name VARCHAR(20),
-                email VARCHAR(200) NOT NULL UNIQUE,
-                login VARCHAR(200) NOT NULL UNIQUE,
-                password VARCHAR(100)
+                last_name text NOT NULL,
+                first_name text NOT NULL,
+                middle_name text,
+                email text NOT NULL UNIQUE,
+                login text NOT NULL UNIQUE,
+                password text NOT NULL
             )
         ''')
         cur.execute('''
@@ -23,7 +24,7 @@ class Database:
                 bank_id SERIAL PRIMARY KEY,
                 user_id INTEGER,
                 bank_name VARCHAR(100),
-                FOREIGN KEY (user_id) REFERENCES "User" (user_id) ON DELETE CASCADE
+                FOREIGN KEY (user_id) REFERENCES Users (user_id) ON DELETE CASCADE
             )
         ''')
         cur.execute('''
@@ -65,30 +66,47 @@ class Database:
             )
         ''')
 
-        self.conn.commit()
+        self.__conn.commit()
 
     def add_data_user(self, last_name, first_name, middle_name, email, login, password):
-        cur = self.conn.cursor()
-        cur.execute('''
-            INSERT INTO "User" (last_name, first_name, middle_name, email, login, password) 
-            VALUES (%s, %s, %s, %s, %s, %s) 
-            RETURNING user_id
-        ''', (last_name, first_name, middle_name, email, login, password))
-        self.conn.commit()
-        return cur.fetchone()[0]
+        try:
+            cur = self.__conn.cursor()
 
+            cur.execute(f"SELECT COUNT(*) as email_count FROM Users WHERE email LIKE '{email}'")
+            res = cur.fetchone()
+            if res[0] > 0:
+                return (False, "Пользователь с таким email уже существует")
+            
+            cur.execute(f"SELECT COUNT(*) as login_count FROM Users WHERE login LIKE '{login}'")
+            res = cur.fetchone()
+            if res[0] > 0:
+                print()
+                return (False, "Пользователь с таким login уже существует")
+
+            cur.execute('''
+                INSERT INTO Users (last_name, first_name, middle_name, email, login, password) 
+                VALUES (%s, %s, %s, %s, %s, %s) 
+                RETURNING user_id
+            ''', (last_name, first_name, middle_name, email, login, password))
+            self.__conn.commit()
+
+        except sqlite3.Error as e:
+            return (False, str(e))
+
+        return (True, '')
+    
     def add_data_bank(self, user_id: int, bank_name: str):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             INSERT INTO Bank (user_id, bank_name) 
             VALUES (%s, %s) 
             RETURNING bank_id
         ''', (user_id, bank_name,))
-        self.conn.commit()
+        self.__conn.commit()
         return cur.fetchone()[0]
 
     def add_data_kit(self, bank_id: int, kit_name: str):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             INSERT INTO Kit (bank_id, kit_name) 
             VALUES (%s, %s) 
@@ -98,7 +116,7 @@ class Database:
         return cur.fetchone()[0]
 
     def add_data_test(self, kit_id: int, test_name: str):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             INSERT INTO Test (kit_id, test_name)
             VALUES (%s, %s) 
@@ -108,129 +126,187 @@ class Database:
         return cur.fetchone()[0]
 
     def add_data_task(self, kit_id: int, test_id: int, question_text: str):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             INSERT INTO Task (kit_id, test_id, question_text)
             VALUES (%s, %s, %s) 
             RETURNING task_id
         ''', (kit_id, test_id, question_text,))
-        self.conn.commit()
+        self.__conn.commit()
         return cur.fetchone()[0]
 
     def add_data_answer(self, task_id: int, answer_text: str, is_right: bool):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             INSERT INTO Answer (task_id, answer_text, is_right)
             VALUES (%s, %s, %s) 
             RETURNING answer_id
         ''', (task_id, answer_text, is_right,))
-        self.conn.commit()
+        self.__conn.commit()
         return cur.fetchone()[0]
 
     def update_bank_name(self, user_id: int, bank_id: int, new_bank_name: str):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             UPDATE Bank 
             SET bank_name = %s 
             WHERE user_id = %s AND bank_id = %s
         ''', (new_bank_name, user_id, bank_id,))
-        self.conn.commit()
+        self.__conn.commit()
 
     def update_kit_name(self, kit_id: int, new_bank_name: str):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             UPDATE Kit 
             SET kit_name = %s 
             WHERE kit_id = %s
         ''', (new_bank_name, kit_id))
-        self.conn.commit()
+        self.__conn.commit()
 
     def update_test_name(self, test_id: int, new_test_name: str):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             UPDATE Test 
             SET test_name = %s 
             WHERE test_id = %s
         ''', (new_test_name, test_id))
-        self.conn.commit()
+        self.__conn.commit()
 
     def update_test_question(self, task_id: int, new_task_question: str):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             UPDATE Task 
             SET question_text = %s 
             WHERE task_id = %s
         ''', (new_task_question, task_id))
-        self.conn.commit()
+        self.__conn.commit()
 
     def update_answer(self, answer_id: int, new_answer_text: str, is_right: bool):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             UPDATE Answer 
             SET answer_text = %s, is_right = %s 
             WHERE answer_id = %s
         ''', (new_answer_text, is_right, answer_id))
-        self.conn.commit()
+        self.__conn.commit()
 
     def delete_data_user(self, user_id: int):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
                DELETE 
-               FROM "User" 
+               FROM Users
                WHERE user_id = %s
            ''', (user_id,))
-        self.conn.commit()
+        self.__conn.commit()
 
     def delete_data_bank(self, bank_id: int):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
                DELETE 
                FROM Bank 
                WHERE bank_id = %s
            ''', (bank_id,))
-        self.conn.commit()
+        self.__conn.commit()
 
     def delete_data_kit(self, kit_id: int):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             DELETE 
             FROM Kit 
             WHERE kit_id = %s
         ''', (kit_id,))
-        self.conn.commit()
+        self.__conn.commit()
 
     def delete_data_test(self, test_id: int):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             DELETE 
             FROM Test 
             WHERE test_id = %s
         ''', (test_id,))
-        self.conn.commit()
+        self.__conn.commit()
 
     def delete_data_task(self, task_id: int):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             DELETE
             FROM Task 
             WHERE task_id = %s
         ''', (task_id,))
-        self.conn.commit()
+        self.__conn.commit()
 
     def delete_data_answer(self, answer_id: int):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             DELETE 
             FROM Answer 
             WHERE answer_id = %s
         ''', (answer_id,))
-        self.conn.commit()
+        self.__conn.commit()
 
     def select_user(self, user_login_or_email : str, user_password : str):
-        cur = self.conn.cursor()
+        cur = self.__conn.cursor()
         cur.execute('''
             SELECT count(*)
-            FROM "User"
+            FROM Users
             where (login = %s OR email = %s) AND password = %s
         ''', (user_login_or_email, user_login_or_email, user_password))
         return cur.fetchone()[0]
+
+    def get_user_by_id(self, user_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT * FROM Users WHERE user_id = {user_id} LIMIT 1")
+            res = cur.fetchone()
+            if not res:
+                print("Пользователь не найден")
+                return False
+
+            user_dict = {
+            "user_id": res[0],
+            "last_name": res[1],
+            "first_name": res[2],
+            "middle_name": res[3],
+            "email": res[4],
+            "login": res[5],
+            "password": res[6]
+            }
+            return user_dict
+        
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
+
+    def get_user_by_email(self, email):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT * FROM Users WHERE email = '{email}' LIMIT 1")
+            res = cur.fetchone()
+            if not res:
+                print("Пользователь не найден")
+                return False
+
+            user_dict = {
+            "user_id": res[0],
+            "last_name": res[1],
+            "first_name": res[2],
+            "middle_name": res[3],
+            "email": res[4],
+            "login": res[5],
+            "password": res[6]
+            }
+            return user_dict
+        
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
+
+
+    def SetConn(self):
+        self.conn = self.conn = psycopg2.connect(database=cfg.db_name, user=cfg.db_user, host=cfg.db_host, password=cfg.db_password)
+        return self.__conn
+
+    def Close(self):
+        return self.__conn.close()

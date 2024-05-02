@@ -1,10 +1,10 @@
-import Answer
-import Test
+import ProjectPractice.TestClasses.Answer as Answer
+import ProjectPractice.TestClasses.Test as Test
 import User
 import UserInfo
-import Bank
-import Task
-import Kit
+import ProjectPractice.TestClasses.Bank as Bank
+import ProjectPractice.TestClasses.Task as Task
+import ProjectPractice.TestClasses.Kit as Kit
 import database
 
 class Interface:

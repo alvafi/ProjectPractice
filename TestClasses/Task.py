@@ -1,4 +1,4 @@
-import Answer
+import ProjectPractice.TestClasses.Answer as Answer
 
 class Task:
     def __init__(self, task_id : int, head_text : str, answers : list[Answer.Answer]) -> None:

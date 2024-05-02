@@ -1,8 +1,8 @@
 import re
-import Test
-import Task
-import Answer
-import Kit
+import ProjectPractice.TestClasses.Test as Test
+import ProjectPractice.TestClasses.Task as Task
+import ProjectPractice.TestClasses.Answer as Answer
+import ProjectPractice.TestClasses.Kit as Kit
 import Constants
 
 # Обработка одного варианта шаблона Symbols

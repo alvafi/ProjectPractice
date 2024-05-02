@@ -1,4 +1,4 @@
-import Test
+import ProjectPractice.TestClasses.Test as Test
 
 class Kit:
     def __init__(self, kit_id : int, name : str) -> None:

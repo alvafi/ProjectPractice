@@ -1,4 +1,4 @@
-import Task
+import ProjectPractice.TestClasses.Task as Task
 
 class Test:
     def __init__(self, test_id : int, name : str) -> None:
