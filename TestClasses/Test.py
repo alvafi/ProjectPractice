@@ -1,10 +1,10 @@
-import ProjectPractice.TestClasses.Task as Task
+from TestClasses.Task import Task
 
 class Test:
-    def __init__(self, test_id : int, name : str) -> None:
+    def __init__(self, test_id : int, name : str, tasks : list[Task]) -> None:
         self.__test_id = test_id
         self.__name = name
-        self.__tasks = []
+        self.__tasks = tasks
 
     def GetId(self) -> int:
         return self.__test_id
@@ -15,7 +15,7 @@ class Test:
     def GetName(self) -> str:
         return self.__name
     
-    def GetTasks(self) -> list[Task.Task]:
+    def GetTasks(self) -> list[Task]:
         return self.__tasks
 
     def SetName(self, new_test_name : str) -> None:

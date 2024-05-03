@@ -1,4 +1,4 @@
-import ProjectPractice.TestClasses.Kit as Kit
+from TestClasses.Kit import Kit
 
 class Bank:
     def __init__(self, bank_id : int, name : str) -> None:
