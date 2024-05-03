@@ -52,7 +52,7 @@ class Database:
                 test_id INTEGER,
                 question_text VARCHAR(1000),
                 FOREIGN KEY (kit_id) REFERENCES Kit (kit_id) ON DELETE CASCADE,
-                FOREIGN KEY (test_id) REFERENCES Test (test_id) ON DELETE CASCADE
+                FOREIGN KEY (test_id) REFERENCES Test (test_id)
             )
         ''')
 
@@ -96,99 +96,158 @@ class Database:
         return (True, '')
     
     def add_data_bank(self, user_id: int, bank_name: str):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            INSERT INTO Bank (user_id, bank_name) 
-            VALUES (%s, %s) 
-            RETURNING bank_id
-        ''', (user_id, bank_name,))
-        self.__conn.commit()
-        return cur.fetchone()[0]
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                INSERT INTO Bank (user_id, bank_name) 
+                VALUES (%s, %s) 
+                RETURNING bank_id
+            ''', (user_id, bank_name,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return None, str(e)
+
+        return cur.fetchone()[0], ""
 
     def add_data_kit(self, bank_id: int, kit_name: str):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            INSERT INTO Kit (bank_id, kit_name) 
-            VALUES (%s, %s) 
-            RETURNING kit_id
-        ''', (bank_id, kit_name,))
-        self.conn.commit()
-        return cur.fetchone()[0]
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                INSERT INTO Kit (bank_id, kit_name) 
+                VALUES (%s, %s) 
+                RETURNING kit_id
+            ''', (bank_id, kit_name,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return None, str(e)
+
+        return cur.fetchone()[0], ""
 
     def add_data_test(self, kit_id: int, test_name: str):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            INSERT INTO Test (kit_id, test_name)
-            VALUES (%s, %s) 
-            RETURNING test_id
-        ''', (kit_id, test_name,))
-        self.conn.commit()
-        return cur.fetchone()[0]
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                INSERT INTO Test (kit_id, test_name)
+                VALUES (%s, %s) 
+                RETURNING test_id
+            ''', (kit_id, test_name,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return None, str(e)
 
-    def add_data_task(self, kit_id: int, test_id: int, question_text: str):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            INSERT INTO Task (kit_id, test_id, question_text)
-            VALUES (%s, %s, %s) 
-            RETURNING task_id
-        ''', (kit_id, test_id, question_text,))
-        self.__conn.commit()
-        return cur.fetchone()[0]
+        return cur.fetchone()[0], ""
+
+    def add_data_task(self, kit_id: int, test_id: int | None, question_text: str):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                INSERT INTO Task (kit_id, test_id, question_text)
+                VALUES (%s, %s, %s) 
+                RETURNING task_id
+            ''', (kit_id, test_id, question_text,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return None, str(e)
+
+        return cur.fetchone()[0], ""
 
     def add_data_answer(self, task_id: int, answer_text: str, is_right: bool):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            INSERT INTO Answer (task_id, answer_text, is_right)
-            VALUES (%s, %s, %s) 
-            RETURNING answer_id
-        ''', (task_id, answer_text, is_right,))
-        self.__conn.commit()
-        return cur.fetchone()[0]
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                INSERT INTO Answer (task_id, answer_text, is_right)
+                VALUES (%s, %s, %s) 
+                RETURNING answer_id
+            ''', (task_id, answer_text, is_right,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return None, str(e)
 
-    def update_bank_name(self, user_id: int, bank_id: int, new_bank_name: str):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            UPDATE Bank 
-            SET bank_name = %s 
-            WHERE user_id = %s AND bank_id = %s
-        ''', (new_bank_name, user_id, bank_id,))
-        self.__conn.commit()
+        return cur.fetchone()[0], ""
+
+    def update_bank_name(self, bank_id: int, new_bank_name: str):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                UPDATE Bank 
+                SET bank_name = %s
+                WHERE bank_id = %s
+            ''', (new_bank_name, bank_id,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
+
+        return True, ""
 
     def update_kit_name(self, kit_id: int, new_bank_name: str):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            UPDATE Kit 
-            SET kit_name = %s 
-            WHERE kit_id = %s
-        ''', (new_bank_name, kit_id))
-        self.__conn.commit()
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                UPDATE Kit 
+                SET kit_name = %s 
+                WHERE kit_id = %s
+            ''', (new_bank_name, kit_id))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
+
+        return True, ""
 
     def update_test_name(self, test_id: int, new_test_name: str):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            UPDATE Test 
-            SET test_name = %s 
-            WHERE test_id = %s
-        ''', (new_test_name, test_id))
-        self.__conn.commit()
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                UPDATE Test 
+                SET test_name = %s 
+                WHERE test_id = %s
+            ''', (new_test_name, test_id))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
 
-    def update_test_question(self, task_id: int, new_task_question: str):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            UPDATE Task 
-            SET question_text = %s 
-            WHERE task_id = %s
-        ''', (new_task_question, task_id))
-        self.__conn.commit()
+        return True, ""
+
+    def update_task_question(self, task_id: int, new_task_question: str):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                UPDATE Task 
+                SET question_text = %s 
+                WHERE task_id = %s
+            ''', (new_task_question, task_id))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
+
+        return True, ""
+
+    def update_task_tests_id(self, tasks_id : list[int], new_test_id: int):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f'''
+                UPDATE Task
+                SET test_id = '{new_test_id}'
+                WHERE task_id in ({','.join(str(i) for i in tasks_id)})
+            ''')
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
+
+        return True, ""
 
     def update_answer(self, answer_id: int, new_answer_text: str, is_right: bool):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            UPDATE Answer 
-            SET answer_text = %s, is_right = %s 
-            WHERE answer_id = %s
-        ''', (new_answer_text, is_right, answer_id))
-        self.__conn.commit()
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                UPDATE Answer 
+                SET answer_text = %s, is_right = %s 
+                WHERE answer_id = %s
+            ''', (new_answer_text, is_right, answer_id))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
+
+        return True, ""
 
     def delete_data_user(self, user_id: int):
         cur = self.__conn.cursor()
@@ -303,9 +362,8 @@ class Database:
 
         return False
 
-
     def SetConn(self):
-        self.conn = self.conn = psycopg2.connect(database=cfg.db_name, user=cfg.db_user, host=cfg.db_host, password=cfg.db_password)
+        self.__conn = self.__conn = psycopg2.connect(database=cfg.db_name, user=cfg.db_user, host=cfg.db_host, password=cfg.db_password)
         return self.__conn
 
     def Close(self):
