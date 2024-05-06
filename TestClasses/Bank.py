@@ -1,13 +1,9 @@
 from TestClasses.Kit import Kit
 
 class Bank:
-    def __init__(self, bank_id : int, name : str) -> None:
-        self.__bank_id = bank_id
+    def __init__(self, name : str) -> None:
         self.__name = name
         self.__kits = []
-
-    def GetId(self) -> int:
-        return self.__bank_id
 
     def GetName(self):
         return self.__name

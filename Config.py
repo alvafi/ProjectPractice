@@ -4,6 +4,9 @@ db_password = "postgres"
 db_host = "localhost"
 
 
-symbol_mode = 0
-key_mode = 1
-answer_under_question_mode = 2
+symbol_mode = "symbol"
+key_mode = "key"
+answer_under_question_mode = "answer"
+
+hanle_input = "handle"
+file_input = "file"

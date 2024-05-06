@@ -361,6 +361,82 @@ class Database:
             print("Ошибка получения данных из БД "+str(e))
 
         return False
+    
+    def get_banks_by_id(self, user_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT bank_id, bank_name FROM Bank WHERE user_id = {user_id}")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res
+        
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
+
+    def get_kits_by_bank_id(self, bank_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT kit_id, kit_name FROM Kit WHERE bank_id = {bank_id}")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res
+        
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
+
+    
+    def get_tests_by_kit_id(self, kit_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT test_id, test_name FROM Test WHERE kit_id = {kit_id}")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res
+        
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
+
+    def get_tasks_by_test_id(self, test_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT task_id, question_text FROM Task WHERE test_id = {test_id}")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res
+        
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
+    
+    def get_answers_by_task_id(self, task_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT answer_id, answer_text, is_right FROM Answer WHERE task_id = {task_id}")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res
+        
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
 
     def SetConn(self):
         self.__conn = self.__conn = psycopg2.connect(database=cfg.db_name, user=cfg.db_user, host=cfg.db_host, password=cfg.db_password)

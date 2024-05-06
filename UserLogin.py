@@ -13,8 +13,15 @@ class UserLogin(UserMixin):
     def get_id(self):
         return str(self.__user['user_id'])
 
-    def GetName(self):
+    def GetFirstName(self):
         return str(self.__user['first_name'])
+    
+    def GetMiddleName(self):
+        return str(self.__user['middle_name'])
+    
+    def GetLastName(self):
+        return str(self.__user['last_name'])
+    
 
     def GetLogin(self):
         return self.__user['login'] if self.__user else "Без логина"

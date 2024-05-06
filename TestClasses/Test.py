@@ -1,13 +1,9 @@
 from TestClasses.Task import Task
 
 class Test:
-    def __init__(self, test_id : int, name : str, tasks : list[Task]) -> None:
-        self.__test_id = test_id
+    def __init__(self, name : str) -> None:
         self.__name = name
-        self.__tasks = tasks
-
-    def GetId(self) -> int:
-        return self.__test_id
+        self.__tasks = []
 
     def AddTask(self, task : Task) -> None:
         self.__tasks.append(task)

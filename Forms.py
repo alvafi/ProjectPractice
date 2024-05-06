@@ -1,6 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, BooleanField, PasswordField
+from wtforms import StringField, SubmitField, BooleanField, PasswordField, FileField, SelectField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
+from wtforms.widgets import TextArea
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+from Config import symbol_mode, key_mode, answer_under_question_mode
+
 
 class LoginForm(FlaskForm):
     email = StringField("Email: ", validators=[Email("Некорректный email")])
@@ -15,6 +19,22 @@ class RegisterForm(FlaskForm):
     login = StringField("Логин: ", validators=[Length(min=4, max=200, message="Логин должен быть от 4 до 200 символов")])
     email = StringField("Email: ", validators=[Email("Некорректный email")])
     password = PasswordField("Пароль: ", validators=[DataRequired(), Length(min=7, max=100, message="Пароль должен быть от 7 до 100 символов")])
-
     password2 = PasswordField("Повтор пароля: ", validators=[DataRequired(), EqualTo('password', message="Пароли не совпадают")])
+    conf_flag = BooleanField("Согласие на обработку и хранение данных", validators=[DataRequired()])
     submit = SubmitField("Регистрация")
+
+class AddTaskForm(FlaskForm):
+    bank_id = SelectField("Загрузить в набор:", choices=[])
+    test_mode = SelectField("Формат теста:", choices=[(symbol_mode, "Символы"), (key_mode, "Ключи"), (answer_under_question_mode, "Ответы под вопросами")])
+    name = StringField("Название:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
+    text = StringField("Введите текст", widget=TextArea())
+    file = FileField("Загрузить файл")
+    submit = SubmitField("Добавить")
+
+    def __init__(self, *args, **kwargs):
+        super(AddTaskForm, self).__init__(*args, **kwargs)
+        self.enctype = 'multipart/form-data'
+
+class AddBankForm(FlaskForm):
+    name = StringField("Название набора:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
+    submit = SubmitField("Создать")

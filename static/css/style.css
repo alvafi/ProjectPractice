@@ -1,0 +1,232 @@
+* {
+    margin: 0;
+    padding: 0;
+  }
+  
+  a {
+    text-decoration: none;
+    color: black;
+  }
+  
+  li {
+    list-style: none;
+  }
+  
+  .container {
+    width: 84%;
+    margin-left: 8%;
+    margin-right: 8%;
+    margin-top: 20px;
+  
+  }
+  
+  header {
+    width: 100%;
+    display: flex;
+    box-shadow: 10px 0 10px rgba(0, 0, 0, 0.4);
+  }
+  
+  
+  .header_line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .header_logo {
+    color: black;
+    font-weight: 500;
+    font-size: 26px;
+    display: flex;
+  }
+  
+  .header_logo_item {
+    margin-left: 40px;
+    margin-top: 5px;
+  }
+  
+  .header_nav {
+    display: flex;
+  
+  }
+  
+  .account {
+    display: flex;
+    align-items: center;
+  }
+  
+  .account_item {
+    margin-right: 15px;
+  }
+  
+  .main {
+    flex-grow: 1;
+  
+  }
+  
+  .main_nav {
+    display: flex;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+  
+  }
+  
+  .main_nav_item {
+    margin-left: 37px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 20px;
+  }
+  
+  .info {
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    margin-top: 20px;
+    font-size: 18px;
+    line-height: 2;
+  }
+  
+  .info_item {
+    margin-left: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+  }
+  
+  .kits {
+    margin-top: 20px;
+    font-size: 18px;
+    margin-left: 8%;
+    margin-right: 8%;
+  }
+  
+  .kit {
+    background-color: rgba(161, 171, 180, 1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  
+  }
+  
+  .subkit {
+    background-color: rgba(161, 171, 180, 1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    margin-left: 9%;
+    margin-right: 9%;
+  }
+
+  .kits_item {
+    margin-left: 5px;
+  }
+  
+  .menu {
+    margin-right: 5px;
+  }
+  
+  .name_kit {
+    display: flex;
+  }
+  
+  .name_subkit {
+    display: flex;
+    margin-left: 9%;
+    margin-right: 9%;
+    margin-bottom: 20px;
+  }
+
+  .sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: rgba(66, 96, 126, 0.95);
+    overflow-x: hidden;
+    padding-top: 60px;
+    transition: 0.7s;
+  }
+  
+  .sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 26px;
+    color: white;
+    display: block;
+    transition: 0.3s;
+  }
+  
+  .sidenav a:hover {
+    color: rgb(141, 198, 255);
+  }
+  
+  .sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+  }
+  
+  
+  .container_registration {
+    max-width: 500px;
+    margin: auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
+  
+  .new_bank_button {
+    margin-left: 8%;
+    margin-right: 8%;
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 16px;
+  }
+  
+  input[type="submit"] {
+    background-color: rgba(66, 96, 126);
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  input[type="text_task"] {
+    width: 50%;
+    height: 30px;
+  }
+  
+  input[type="submit"]:hover {
+    background-color: rgba(66, 96, 126);
+  }
+
+  .flash {
+    padding: 10px;
+  }
+  .flash.success {
+    border: 1px solid #21DB56;
+    background: #AEFFC5;
+  }
+  .flash.error {
+    border: 1px solid #FF4343;
+    background: #FF9C9C;
+  }

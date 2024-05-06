@@ -1,26 +1,27 @@
 import re
-import ProjectPractice.TestClasses.Test as Test
-import ProjectPractice.TestClasses.Task as Task
-import ProjectPractice.TestClasses.Answer as Answer
-import ProjectPractice.TestClasses.Kit as Kit
-import Constants
+from TestClasses.Test import Test
+from TestClasses.Task import Task
+from TestClasses.Answer import Answer
+from TestClasses.Kit import Kit
+from Config import symbol_mode, key_mode, answer_under_question_mode
 
 # Обработка одного варианта шаблона Symbols
-def ParserForOneVariantSymbols(test_name : str, input_text : str) -> Test:
-    test = Test.Test(test_name)
-    text_of_tasks = re.split('\n\n+', input_text)
-    text_of_tasks = list(filter(lambda x: x != '', text_of_tasks))
-    
-    for task_text in text_of_tasks:
-        splited_task = re.split('\n', task_text)
+def ParserForOneVariantSymbols(test_name : str, input_text : str, split_type : str) -> Test:
+    test = Test(test_name)
 
+    text_of_tasks = re.split(str(split_type + split_type + '+'), input_text)
+    text_of_tasks = list(filter(lambda x: x != '', text_of_tasks))
+    print(text_of_tasks)
+    for task_text in text_of_tasks:
+        splited_task = re.split(split_type, task_text)
+        splited_task = list(filter(lambda x: x != '', splited_task))
         answers = []
         for i in range(1, len(splited_task)):
             if re.match('[*#]',splited_task[i]):
-                answers.append(Answer.Answer(splited_task[i][1:], True))
+                answers.append(Answer(splited_task[i][1:], True))
             else:
-                answers.append(Answer.Answer(splited_task[i], False))
-        test.AddTask(Task.Task(splited_task[0], answers))
+                answers.append(Answer(splited_task[i], False))
+        test.AddTask(Task(splited_task[0], answers))
     return test
 
 # Шаблон:
@@ -44,22 +45,23 @@ def ParserForOneVariantSymbols(test_name : str, input_text : str) -> Test:
 # Ответ3
 
 # Обработка варинтов шаблона Symbols
-def ParserForSymbols(test_name: str,  task_text : str, kit: Kit) -> None:
+def ParserForSymbols(test_name: str,  task_text : str, kit: Kit, split_type : str) -> None:
     task_text = re.split(r'Вариант\s*\d+', task_text)
     task_text = list(filter(lambda x: x != '', task_text))
+    if len(task_text) == 1:
+        kit.AddTest(ParserForOneVariantSymbols(test_name, task_text[0], split_type))
+        return
     for variant in range(len(task_text)):
-        kit.AddTest(ParserForOneVariantSymbols(test_name + ' вариант ' + str(variant), task_text[variant]))
+        kit.AddTest(ParserForOneVariantSymbols(test_name + ' вариант ' + str(variant + 1), task_text[variant], split_type))
     
 
 # Обравотка одного варианта keys
-def ParserForOneVariantKeys(test_name : str, input_text : str, keys : dict[int : str]) -> Test:
-    test = Test.Test(test_name)
-    text_of_tasks = re.split('\n\n+', input_text)
+def ParserForOneVariantKeys(test_name : str, input_text : str, keys : dict[int : str], split_type) -> Test:
+    test = Test(test_name)
+    text_of_tasks = re.split(str(split_type + split_type + '+'), input_text)
     text_of_tasks = list(filter(lambda x: x != '', text_of_tasks))
-    
     for text_of_task in text_of_tasks:
-        
-        splited_task = re.split('\n', text_of_task)
+        splited_task = re.split(split_type, text_of_task)
         splited_task = list(filter(lambda x: x != '', splited_task))
         answers = []
 
@@ -75,25 +77,25 @@ def ParserForOneVariantKeys(test_name : str, input_text : str, keys : dict[int :
         for i in range(1, len(splited_task)):
             match = re.match('^(\w+\)) (.*)', splited_task[i]) # ищем букву ответа
             if not match:
-                answers.append(Answer.Answer(splited_task[i], False))
+                answers.append(Answer(splited_task[i], False))
                 continue
 
             if number_of_task and match.group(1)[:-1] in keys[number_of_task]:
-                answers.append(Answer.Answer(match.group(2), True))
+                answers.append(Answer(match.group(2), True))
             else:
-                answers.append(Answer.Answer(match.group(2), False))
+                answers.append(Answer(match.group(2), False))
 
-        test.AddTask(Task.Task(text_of_head, answers))
+        test.AddTask(Task(text_of_head, answers))
     return test
 
 # Обработка ключей шаблона keys
-def GetKeys(keys_text : str) -> list[dict[int : str]]:
+def GetKeys(keys_text : str, split_type) -> list[dict[int : str]]:
     for i in range(len(keys_text)): # ищем первую цифру чтобы начать с нее
         if keys_text[i].isdigit():
             keys_text = keys_text[i:]
             break
 
-    keys_text = re.split("\n+", keys_text)
+    keys_text = re.split(str(split_type + '+'), keys_text)
     keys = []
     key_dict = {}
     for i in range(len(keys_text)):
@@ -143,34 +145,38 @@ def GetKeys(keys_text : str) -> list[dict[int : str]]:
 # 2 е
 
 # Обработка вариантов шаблона keys
-def ParserForKeys(test_name : str, file_text : str, kit : Kit) -> None:
+def ParserForKeys(test_name : str, file_text : str, kit : Kit, split_type) -> None:
     last_occurrence = max(file_text.rfind("Ключ"), file_text.rfind("ключ"))
     task_text = re.split(r'Вариант\s*\d+', file_text[:last_occurrence])
     task_text = list(filter(lambda x: x != '', task_text))
 
     keys_text = file_text[last_occurrence:]
-    keys = GetKeys(keys_text)
+    keys = GetKeys(keys_text, split_type)
     
+    if len(task_text) == 1:
+        kit.AddTest(ParserForOneVariantKeys(test_name, task_text[0], keys[0], split_type))
+        return
+
     for variant in range(len(task_text)):
-        kit.AddTest(ParserForOneVariantKeys(test_name + ' вариант ' + str(variant), task_text[variant], keys[variant]))
+        kit.AddTest(ParserForOneVariantKeys(test_name + ' вариант ' + str(variant + 1), task_text[variant], keys[variant], split_type))
 
 
 # Обрботка одного врианта AnswerUnderQuestion
-def ParserForOneVariantAnswerUnderQuestion(test_name : str, input_text : str) -> Test:
-    test = Test.Test(test_name)
-    text_of_tasks = re.split('\n\n+', input_text)
+def ParserForOneVariantAnswerUnderQuestion(test_name : str, input_text : str, split_type) -> Test:
+    test = Test(test_name)
+    text_of_tasks = re.split(str(split_type + split_type + '+'), input_text)
     text_of_tasks = list(filter(lambda x: x != '', text_of_tasks))
     for task_text in text_of_tasks:
-        splited_task = re.split('\n', task_text)
+        splited_task = re.split(split_type, task_text)
         splited_task = list(filter(lambda x: x != '', splited_task))
         answers = []
         for i in range(1, len(splited_task) - 1):
             num = splited_task[i].strip()[0]
             if num in splited_task[-1].split("Ответ:")[1]:
-                answers.append(Answer.Answer(splited_task[i][2:].strip(), True))
+                answers.append(Answer(splited_task[i][2:].strip(), True))
             else:
-                answers.append(Answer.Answer(splited_task[i][2:].strip(), False))
-        test.AddTask(Task.Task(splited_task[0], answers))
+                answers.append(Answer(splited_task[i][2:].strip(), False))
+        test.AddTask(Task(splited_task[0], answers))
     return test
 
 # Шаблон:
@@ -197,20 +203,54 @@ def ParserForOneVariantAnswerUnderQuestion(test_name : str, input_text : str) ->
 # Ответ: 13
 
 # Обработка вариантов AnswerUnderQuestion
-def ParserForAnswerUnderQuestion(test_name: str, task_text : str, kit: Kit) -> None:
+def ParserForAnswerUnderQuestion(test_name: str, task_text : str, kit: Kit, split_type) -> None:
     task_text = re.split(r'Вариант\s*\d+', task_text)
     task_text = list(filter(lambda x: x != '', task_text))
+    if len(task_text) == 1:
+        kit.AddTest(ParserForOneVariantAnswerUnderQuestion(test_name, task_text[0], split_type))
+        return
     for variant in range(len(task_text)):
-        kit.AddTest(ParserForOneVariantAnswerUnderQuestion(test_name + ' вариант ' + str(variant), task_text[variant]))
+        kit.AddTest(ParserForOneVariantAnswerUnderQuestion(test_name + ' вариант ' + str(variant), task_text[variant], split_type))
 
 
 # Принимает имя теста(введено пользователем), текст для обработки,
 # набор в который добавятся тесты и input_mode(смотри Constants.py)
-def Parse(test_name : str, input_text : str, kit : Kit,  input_mode : str) -> None:
+def Parse(test_name : str, input_text : str, kit : Kit,  input_type : str, input_mode : str) -> None:
     match input_mode:
-        case Constants.symbol_mode:
-            ParserForSymbols(test_name, input_text, kit)
-        case Constants.key_mode:
-            ParserForKeys(test_name, input_text, kit)
-        case Constants.answer_under_question_mode:
-            ParserForAnswerUnderQuestion(test_name, input_text, kit)
+        case "handle":
+            match input_type:
+                case "symbol":
+                    ParserForSymbols(test_name, input_text, kit, "\\r\\n")
+                case "key":
+                    ParserForKeys(test_name, input_text, kit, "\\r\\n")
+                case "answer":
+                    ParserForAnswerUnderQuestion(test_name, input_text, kit, "\\r\\n")
+        case "file":
+            match input_type:
+                case "symbol":
+                    ParserForSymbols(test_name, input_text, kit, "\\n")
+                case "key":
+                    ParserForKeys(test_name, input_text, kit, "\\n")
+                case "answer":
+                    ParserForAnswerUnderQuestion(test_name, input_text, kit, "\\n")
+
+
+
+input_text = """
+Хрящевые рыбы относятся к надклассу 
+*Gnathostomata
+Agnatha
+Cyclostomata
+Acrania
+
+Выберите правильное латинское название для класса Пластиножаберные
+*Elasmosranchii
+Holocephali
+Chondrichthyes
+Lamellibranchia
+
+kit = Kit("АДЬЫ")
+Parse("Касатки", input_text, kit, "symbol")
+for test in kit.GetTests():
+    for task in test.GetTasks():
+        print(task.GetQuestion())"""

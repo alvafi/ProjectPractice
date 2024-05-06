@@ -1,0 +1,66 @@
+{% extends 'base_menu.html' %}
+{% block content %}
+{{ super() }}
+
+<body>
+    <div class="main">
+      {% for cat, msg in get_flashed_messages(True) %}
+      <div class="flash {{cat}}">{{ msg }}</div>
+      {% endfor %}
+        <a href="{{ url_for('addBank')}}" class="new_bank_button">Новый набор</a>
+
+        {% if banks %}
+        {% for bank_id, bank_name in banks %}
+        <div class="kits">
+            <details>
+                <summary class="kit">
+                  <div class="name_kit">
+                    <img src="{{ url_for('static', filename='images/eject.png') }}" alt="">
+                    <p class="kits_item">{{ bank_name }}</p>
+                  </div>
+                  <div class="menu">
+                    <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/pen-solid.png') }}" alt=""></a>
+                    <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/plus.png') }}" alt=""></a>
+                    <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/import.png') }}" alt=""></a>
+                    <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/trash-alt.png') }}" alt=""></a>
+                  </div>
+                </summary>
+                {% set kits = dbase.get_kits_by_bank_id(bank_id) %}
+                {% if kits %}
+                    {% for kit_id, kit_name in kits %}
+                    <details>
+                    <summary class="subkit">
+                        <div class="name_kit">
+                          <img src="{{ url_for('static', filename='images/eject.png') }}" alt="">
+                          <p class="kits_item">{{ kit_name }}</p>
+                        </div>
+                        <div class="menu">
+                          <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/pen-solid.png') }}" alt=""></a>
+                          <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/plus.png') }}" alt=""></a>
+                          <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/import.png') }}" alt=""></a>
+                          <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/trash-alt.png') }}" alt=""></a>
+                        </div>
+                    </summary>
+                      {% set tests = dbase.get_tests_by_kit_id(kit_id) %} 
+                      {% if tests %}
+                        {% for test_id, test_name in tests %}
+                            <a href="{{ url_for('showTest', test_id = test_id) }}" class="name_subkit">{{ test_name }}</a>
+                        {% endfor %}
+                      {% else %}
+                      <p class="name_subkit">Пока здесь пусто</p>
+                      {% endif %}
+                    </details>
+                    {% endfor %}
+                {% else %}
+                    <p class="kit_name">Пока здесь пусто</p>
+                {% endif %}
+              </details>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="kits">Пока здесь пусто</p>
+        {% endif %}
+    </div>
+</body>
+
+{% endblock %}

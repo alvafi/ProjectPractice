@@ -1,11 +1,7 @@
 class Answer:
-    def __init__(self, answer_id : int, answer : str, is_right : bool) -> None:
-        self.__answer_id = answer_id
+    def __init__(self, answer : str, is_right : bool) -> None:
         self.__answer = answer
         self.__is_right = is_right
-
-    def GetId(self) -> int:
-        return self.__answer_id
     
     def GetText(self) -> str:
         return self.__answer
