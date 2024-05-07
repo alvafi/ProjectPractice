@@ -38,3 +38,7 @@ class AddTaskForm(FlaskForm):
 class AddBankForm(FlaskForm):
     name = StringField("Название набора:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
     submit = SubmitField("Создать")
+
+class ChangeName(FlaskForm):
+    name = StringField("Новое название:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
+    submit = SubmitField("Изменить")

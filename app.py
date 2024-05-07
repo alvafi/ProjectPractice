@@ -6,13 +6,13 @@ from flask import Flask, flash, request, redirect, url_for, g, render_template
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from Config import db_name, hanle_input, file_input
 from database import Database
-from Forms import RegisterForm, LoginForm, AddTaskForm, AddBankForm
+from Forms import RegisterForm, LoginForm, AddTaskForm, AddBankForm, ChangeName
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from UserLogin import UserLogin
 from Parser import Parse
 from TestClasses.Kit import Kit
-from Interface import add_kit_content, delete_bank
+from Interface import add_kit_content, delete_bank, delete_kit, edit_bank_name, edit_kit_name
 
 DATABASE = f'/tmp/{db_name}.db'
 DEBUG = True
@@ -173,11 +173,57 @@ def addBank():
 
     return render_template('add_bank.html', form = form)
 
+@app.route('/delete_bank/<bank_id>', methods=["POST", "GET"])
+@login_required
+def deleteBank(bank_id):
+    if delete_bank(dbase, bank_id):
+        flash("Набор удален", "success")
+    else:
+        flash("Ошибка при удалении набора", "error")
+    return redirect (url_for('showBanks'))
+
+@app.route('/delete_kit/<kit_id>', methods=["POST", "GET"])
+@login_required
+def deleteKit(kit_id):
+    if delete_kit(dbase, kit_id):
+        flash("Тесты удалены", "success")
+    else:
+        flash("Ошибка при удалении тестов", "error")
+    return redirect (url_for('showBanks'))
+
+
 @app.route('/show_test/<test_id>', methods=["POST", "GET"])
 @login_required
 def showTest(test_id):
     res = dbase.get_tasks_by_test_id(test_id)
     return render_template('show_tests.html', dbase = dbase, tasks = res)
+
+@app.route('/change_bank_name/<bank_id>', methods=["POST", "GET"])
+@login_required
+def changeBankName(bank_id):
+    form = ChangeName()
+    if form.validate_on_submit():
+        if edit_bank_name(dbase, bank_id, form.name.data):
+            flash("Название успешно изменино", "success")
+            return redirect(url_for('showBanks'))
+        else:
+            flash("Произошла ошибка при изменении названия", "error")
+            return redirect(url_for('showBanks'))
+    return render_template('change_name.html', bank_id = bank_id,  form = form)
+
+@app.route('/change_kit_name/<kit_id>', methods=["POST", "GET"])
+@login_required
+def changeKitName(kit_id):
+    form = ChangeName()
+    if form.validate_on_submit():
+        if edit_kit_name(dbase, kit_id, form.name.data):
+            flash("Название успешно изменино", "success")
+            return redirect(url_for('showBanks'))
+        else:
+            flash("Произошла ошибка при изменении названия", "error")
+            return redirect(url_for('showBanks'))
+    return render_template('change_name.html', form = form)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
