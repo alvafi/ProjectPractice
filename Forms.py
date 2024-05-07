@@ -24,7 +24,7 @@ class RegisterForm(FlaskForm):
     submit = SubmitField("Регистрация")
 
 class AddTaskForm(FlaskForm):
-    bank_id = SelectField("Загрузить в набор:", choices=[])
+    bank_id = SelectField("Загрузить в набор:", choices=[], validators=[DataRequired(message="Для добавления теста у вас должен быть создан хотя бы один набор")])
     test_mode = SelectField("Формат теста:", choices=[(symbol_mode, "Символы"), (key_mode, "Ключи"), (answer_under_question_mode, "Ответы под вопросами")])
     name = StringField("Название:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
     text = StringField("Введите текст", widget=TextArea())

@@ -125,9 +125,10 @@ def profile():
 @app.route('/add_test', methods=["POST", "GET"])
 @login_required
 def addTest():
+    form = AddTaskForm() 
     res = dbase.get_banks_by_id(current_user.get_id())
-    form = AddTaskForm()
-    form.bank_id.choices = [(bank_id, bank_name) for bank_id, bank_name in res]
+    if res:
+        form.bank_id.choices = [(bank_id, bank_name) for bank_id, bank_name in res]
     if form.validate_on_submit():
         kit = Kit(form.name.data)
         if form.file.data:
@@ -177,7 +178,6 @@ def addBank():
 def showTest(test_id):
     res = dbase.get_tasks_by_test_id(test_id)
     return render_template('show_tests.html', dbase = dbase, tasks = res)
-
 
 if __name__ == "__main__":
     app.run(debug=True)

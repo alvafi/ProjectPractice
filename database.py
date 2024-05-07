@@ -49,10 +49,10 @@ class Database:
             CREATE TABLE IF NOT EXISTS Task (
                 task_id SERIAL PRIMARY KEY,
                 kit_id INTEGER,
-                test_id INTEGER,
+                test_id BIGINT[],
                 question_text VARCHAR(1000),
-                FOREIGN KEY (kit_id) REFERENCES Kit (kit_id) ON DELETE CASCADE,
-                FOREIGN KEY (test_id) REFERENCES Test (test_id)
+                FOREIGN KEY (kit_id) REFERENCES Kit (kit_id) ON DELETE CASCADE
+                
             )
         ''')
 
@@ -142,7 +142,7 @@ class Database:
             cur = self.__conn.cursor()
             cur.execute('''
                 INSERT INTO Task (kit_id, test_id, question_text)
-                VALUES (%s, %s, %s) 
+                VALUES (%s, ARRAY_APPEND(ARRAY[]::BIGINT[], %s), %s) 
                 RETURNING task_id
             ''', (kit_id, test_id, question_text,))
             self.__conn.commit()
@@ -411,7 +411,7 @@ class Database:
     def get_tasks_by_test_id(self, test_id):
         try:
             cur = self.__conn.cursor()
-            cur.execute(f"SELECT task_id, question_text FROM Task WHERE test_id = {test_id}")
+            cur.execute(f"SELECT task_id, question_text FROM Task WHERE %s = ANY(test_id)", (test_id,))
             res = cur.fetchall()
             if not res:
                 return False
