@@ -22,7 +22,7 @@
                     <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/pen-solid.png') }}" alt=""></a>
                     <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/plus.png') }}" alt=""></a>
                     <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/import.png') }}" alt=""></a>
-                    <a href="@" class="kits_item"><img src="{{ url_for('static', filename='images/trash-alt.png') }}" alt=""></a>
+                    <a href="{{ url_for('deleteBank', bank_id = bank_id) }}" class="kits_item"><img src="{{ url_for('static', filename='images/trash-alt.png') }}" alt=""></a>
                   </div>
                 </summary>
                 {% set kits = dbase.get_kits_by_bank_id(bank_id) %}

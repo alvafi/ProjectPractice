@@ -103,6 +103,57 @@ def add_kit_content(dbase, kit : Kit, bank_id):
                 print(answer_id, "answer_id")
     return True
 
+# Удаление банка
+def delete_bank(dbase, bank_id):
+    all_kits_id = []
+    all_tests_id = []
+    all_tasks_id = []
+    all_answers_id = []
+
+    kits = dbase.get_kits_by_bank_id(bank_id)
+    if not(kits):
+        return False
+    # Получаем наборы для удаления
+    for kit_id, kit_name in kits:
+        all_kits_id.append(kit_id)
+        print(kit_id, "kit_id")
+        tests = dbase.get_tests_by_kit_id(kit_id)
+        if not(tests):
+            return False
+        # Получаем тесты для удаления
+        for test_id, tests_name in tests:
+            all_tests_id.append(test_id)
+            print(test_id, "test_id")
+            tasks = dbase.get_tasks_by_test_id(test_id)
+            if not(tasks):
+                return False
+            # Получаем задания для удаления
+            for task_id, q_texts in tasks:
+                all_tasks_id.append(task_id)
+                print(task_id, "task_id")
+                answers = dbase.get_answers_by_task_id(task_id)
+                if not(answers):
+                    return False
+                # Получаем ответы для удаления
+                for answer_id, answers_text, is_right in answers:
+                    print(answer_id, "answer_id")
+                    all_answers_id.append(answer_id)
+
+    # Удаляем
+    for id in all_answers_id:
+        dbase.delete_data_answer(id)
+    for id in all_tasks_id:
+        dbase.delete_data_task(id)
+    for id in all_tests_id:
+        dbase.delete_data_test(id)
+    for id in all_kits_id:
+        dbase.delete_data_kit(id)
+    dbase.delete_data_bank(bank_id)
+    return True
+
+def delete_kit():
+
+
 
 # Редактирование имени банка тестов
 def edit_bank_name(bank : Bank, new_bank_name : str):
