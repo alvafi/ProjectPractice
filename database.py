@@ -10,7 +10,7 @@ class Database:
         cur = self.__conn.cursor()
         cur.execute('''
             CREATE TABLE IF NOT EXISTS Users (
-                user_id SERIAL PRIMARY KEY,
+                user_id BIGSERIAL PRIMARY KEY,
                 last_name text NOT NULL,
                 first_name text NOT NULL,
                 middle_name text,
@@ -21,16 +21,16 @@ class Database:
         ''')
         cur.execute('''
             CREATE TABLE IF NOT EXISTS Bank (
-                bank_id SERIAL PRIMARY KEY,
-                user_id INTEGER,
+                bank_id BIGSERIAL PRIMARY KEY,
+                user_id BIGINT,
                 bank_name VARCHAR(100),
                 FOREIGN KEY (user_id) REFERENCES Users (user_id) ON DELETE CASCADE
             )
         ''')
         cur.execute('''
             CREATE TABLE IF NOT EXISTS Kit (
-                kit_id SERIAL PRIMARY KEY,
-                bank_id INTEGER,
+                kit_id BIGSERIAL PRIMARY KEY,
+                bank_id BIGINT,
                 kit_name VARCHAR(100),
                 FOREIGN KEY (bank_id) REFERENCES Bank (bank_id) ON DELETE CASCADE
             )
@@ -38,8 +38,8 @@ class Database:
 
         cur.execute('''
             CREATE TABLE IF NOT EXISTS Test (
-                test_id SERIAL PRIMARY KEY,
-                kit_id INTEGER,
+                test_id BIGSERIAL PRIMARY KEY,
+                kit_id BIGINT,
                 test_name VARCHAR(100),
                 FOREIGN KEY (kit_id) REFERENCES Kit (kit_id) ON DELETE CASCADE
             )
@@ -47,19 +47,19 @@ class Database:
 
         cur.execute('''
             CREATE TABLE IF NOT EXISTS Task (
-                task_id SERIAL PRIMARY KEY,
-                kit_id INTEGER,
-                test_id BIGINT[],
+                task_id BIGSERIAL PRIMARY KEY,
+                kit_id BIGINT,
+                test_id BIGINT,
                 question_text VARCHAR(1000),
-                FOREIGN KEY (kit_id) REFERENCES Kit (kit_id) ON DELETE CASCADE
-                
+                FOREIGN KEY (kit_id) REFERENCES Kit (kit_id) ON DELETE CASCADE,
+                FOREIGN KEY (test_id) REFERENCES Test (test_id) ON DELETE SET NULL
             )
         ''')
 
         cur.execute('''
             CREATE TABLE IF NOT EXISTS Answer (
-                answer_id SERIAL PRIMARY KEY,
-                task_id INTEGER,
+                answer_id BIGSERIAL PRIMARY KEY,
+                task_id BIGINT,
                 answer_text VARCHAR(1000),
                 is_right BOOLEAN,
                 FOREIGN KEY (task_id) REFERENCES Task (task_id) ON DELETE CASCADE
@@ -142,7 +142,7 @@ class Database:
             cur = self.__conn.cursor()
             cur.execute('''
                 INSERT INTO Task (kit_id, test_id, question_text)
-                VALUES (%s, ARRAY_APPEND(ARRAY[]::BIGINT[], %s), %s) 
+                VALUES (%s, %s, %s) 
                 RETURNING task_id
             ''', (kit_id, test_id, question_text,))
             self.__conn.commit()
@@ -250,67 +250,88 @@ class Database:
         return True, ""
 
     def delete_data_user(self, user_id: int):
-        cur = self.__conn.cursor()
-        cur.execute('''
-               DELETE 
-               FROM Users
-               WHERE user_id = %s
-           ''', (user_id,))
-        self.__conn.commit()
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                   DELETE 
+                   FROM Users
+                   WHERE user_id = %s
+               ''', (user_id,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
+
+        return True, ""
 
     def delete_data_bank(self, bank_id: int):
-        cur = self.__conn.cursor()
-        cur.execute('''
-               DELETE 
-               FROM Bank 
-               WHERE bank_id = %s
-           ''', (bank_id,))
-        self.__conn.commit()
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                   DELETE 
+                   FROM Bank 
+                   WHERE bank_id = %s
+               ''', (bank_id,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
+
+        return True, ""
 
     def delete_data_kit(self, kit_id: int):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            DELETE 
-            FROM Kit 
-            WHERE kit_id = %s
-        ''', (kit_id,))
-        self.__conn.commit()
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                DELETE 
+                FROM Kit 
+                WHERE kit_id = %s
+            ''', (kit_id,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
+
+        return True, ""
 
     def delete_data_test(self, test_id: int):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            DELETE 
-            FROM Test 
-            WHERE test_id = %s
-        ''', (test_id,))
-        self.__conn.commit()
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                DELETE 
+                FROM Test 
+                WHERE test_id = %s
+            ''', (test_id,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
+
+        return True, ""
 
     def delete_data_task(self, task_id: int):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            DELETE
-            FROM Task 
-            WHERE task_id = %s
-        ''', (task_id,))
-        self.__conn.commit()
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                DELETE
+                FROM Task 
+                WHERE task_id = %s
+            ''', (task_id,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
+
+        return True, ""
 
     def delete_data_answer(self, answer_id: int):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            DELETE 
-            FROM Answer 
-            WHERE answer_id = %s
-        ''', (answer_id,))
-        self.__conn.commit()
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                DELETE 
+                FROM Answer 
+                WHERE answer_id = %s
+            ''', (answer_id,))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False, str(e)
 
-    def select_user(self, user_login_or_email : str, user_password : str):
-        cur = self.__conn.cursor()
-        cur.execute('''
-            SELECT count(*)
-            FROM Users
-            where (login = %s OR email = %s) AND password = %s
-        ''', (user_login_or_email, user_login_or_email, user_password))
-        return cur.fetchone()[0]
+        return True, ""
 
     def get_user_by_id(self, user_id):
         try:
@@ -411,7 +432,11 @@ class Database:
     def get_tasks_by_test_id(self, test_id):
         try:
             cur = self.__conn.cursor()
-            cur.execute(f"SELECT task_id, question_text FROM Task WHERE %s = ANY(test_id)", (test_id,))
+            if test_id is None:
+                cur.execute(f"SELECT task_id, question_text FROM Task WHERE test_id IS NULL")
+            else:
+                cur.execute(f"SELECT task_id, question_text FROM Task WHERE test_id = {test_id}")
+
             res = cur.fetchall()
             if not res:
                 return False
@@ -420,6 +445,21 @@ class Database:
         
         except sqlite3.Error as e:
             print("Ошибка получения данных из БД "+str(e))
+
+        return False
+
+    def get_tasks_by_kit_id_where_test_id_is_null(self, kit_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT task_id, question_text FROM Task WHERE kit_id = {kit_id} AND test_id is NULL")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res
+
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД " + str(e))
 
         return False
     
