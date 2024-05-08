@@ -3,7 +3,7 @@ from wtforms import StringField, SubmitField, BooleanField, PasswordField, FileF
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 from wtforms.widgets import TextArea
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from Config import symbol_mode, key_mode, answer_under_question_mode
+from Config import symbol_mode, key_mode, answer_under_question_mode, XML_mode, IMS_QTI_mode
 
 
 class LoginForm(FlaskForm):
@@ -27,12 +27,23 @@ class AddTaskForm(FlaskForm):
     bank_id = SelectField("Загрузить в набор:", choices=[], validators=[DataRequired(message="Для добавления теста у вас должен быть создан хотя бы один набор")])
     test_mode = SelectField("Формат теста:", choices=[(symbol_mode, "Символы"), (key_mode, "Ключи"), (answer_under_question_mode, "Ответы под вопросами")])
     name = StringField("Название:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
-    text = StringField("Введите текст", widget=TextArea())
+    text = StringField("Введите текст", widget=TextArea(), render_kw={"maxlength": "3700"})
     file = FileField("Загрузить файл")
     submit = SubmitField("Добавить")
 
     def __init__(self, *args, **kwargs):
         super(AddTaskForm, self).__init__(*args, **kwargs)
+        self.enctype = 'multipart/form-data'
+
+class AddTaskToExistingKitForm(FlaskForm):
+    test_mode = SelectField("Формат теста:", choices=[(symbol_mode, "Символы"), (key_mode, "Ключи"), (answer_under_question_mode, "Ответы под вопросами")])
+    name = StringField("Название:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
+    text = StringField("Введите текст", widget=TextArea(), render_kw={"maxlength": "3700"})
+    file = FileField("Загрузить файл")
+    submit = SubmitField("Добавить")
+
+    def __init__(self, *args, **kwargs):
+        super(AddTaskToExistingKitForm, self).__init__(*args, **kwargs)
         self.enctype = 'multipart/form-data'
 
 class AddBankForm(FlaskForm):
@@ -42,3 +53,7 @@ class AddBankForm(FlaskForm):
 class ChangeName(FlaskForm):
     name = StringField("Новое название:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
     submit = SubmitField("Изменить")
+
+class ExportTestForm(FlaskForm):
+    export_type = SelectField("Выберите формат загрузки:", choices=[(XML_mode, "MoodleXML"), (IMS_QTI_mode, "IMS QTI")])
+    submit = SubmitField("Экспорт")

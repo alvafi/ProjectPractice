@@ -78,28 +78,44 @@ def add_kit_content(dbase, kit: Kit, bank_id):
     kit_id = add_kit(dbase, bank_id, kit.GetName())
     if not (kit_id):
         return False
-    print(kit_id, "kit_id")
 
     # Добавление тестов
     for test in kit.GetTests():
         test_id = add_test(dbase, kit_id, test.GetName())
         if not (test_id):
             return False
-        print(test_id, "test_id")
 
         # Добавление заданий
         for task in test.GetTasks():
             task_id = add_task(dbase, kit_id, test_id, task.GetQuestion())
             if not (task_id):
                 return False
-            print(task_id, "task_id")
             # Добавление ответа
             for answer in task.GetAnswers():
                 answer_id = add_answer(dbase, task_id, answer.GetText(), answer.IsRight())
                 if not (answer_id):
                     return False
-                print(answer_id, "answer_id")
     return True
+
+def add_kit_content_to_existing_kit(dbase, kit: Kit, kit_id):
+    # Добавление тестов
+    for test in kit.GetTests():
+        test_id = add_test(dbase, kit_id, test.GetName())
+        if not (test_id):
+            return False
+
+        # Добавление заданий
+        for task in test.GetTasks():
+            task_id = add_task(dbase, kit_id, test_id, task.GetQuestion())
+            if not (task_id):
+                return False
+            # Добавление ответа
+            for answer in task.GetAnswers():
+                answer_id = add_answer(dbase, task_id, answer.GetText(), answer.IsRight())
+                if not (answer_id):
+                    return False
+    return True
+
 
 # Удаление банка
 def delete_bank(dbase, bank_id):

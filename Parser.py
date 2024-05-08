@@ -11,7 +11,6 @@ def ParserForOneVariantSymbols(test_name : str, input_text : str, split_type : s
 
     text_of_tasks = re.split(str(split_type + split_type + '+'), input_text)
     text_of_tasks = list(filter(lambda x: x != '', text_of_tasks))
-    print(text_of_tasks)
     for task_text in text_of_tasks:
         splited_task = re.split(split_type, task_text)
         splited_task = list(filter(lambda x: x != '', splited_task))
@@ -169,13 +168,35 @@ def ParserForOneVariantAnswerUnderQuestion(test_name : str, input_text : str, sp
     for task_text in text_of_tasks:
         splited_task = re.split(split_type, task_text)
         splited_task = list(filter(lambda x: x != '', splited_task))
+
+        # Получаем ответы
+        task_answers = []
+        for text in splited_task[-1].split():
+            if text.isdigit():
+                task_answers.append(text)
+
+
         answers = []
         for i in range(1, len(splited_task) - 1):
-            num = splited_task[i].strip()[0]
-            if num in splited_task[-1].split("Ответ:")[1]:
-                answers.append(Answer(splited_task[i][2:].strip(), True))
+            text_of_answer = splited_task[i].strip()
+
+            # Получаем номер задания
+            num = ''
+            for u in range(0, len(text_of_answer)):
+                if text_of_answer[u].isdigit():
+                    num += text_of_answer[u]
+                else:
+                    for y in range(u, len(text_of_answer)):
+                        if text_of_answer[y].isalnum() or text_of_answer[y].isdigit():
+                            answer_text = text_of_answer[y:]
+                            break
+                    break
+            print(num)
+            print(task_answers)
+            if num in task_answers:
+                answers.append(Answer(answer_text.strip(), True))
             else:
-                answers.append(Answer(splited_task[i][2:].strip(), False))
+                answers.append(Answer(answer_text.strip(), False))
         test.AddTask(Task(splited_task[0], answers))
     return test
 
@@ -200,7 +221,7 @@ def ParserForOneVariantAnswerUnderQuestion(test_name : str, input_text : str, sp
 # 1. Ответ1
 # 2. Ответ2
 # 3. Ответ3
-# Ответ: 13
+# Ответ: 1 3
 
 # Обработка вариантов AnswerUnderQuestion
 def ParserForAnswerUnderQuestion(test_name: str, task_text : str, kit: Kit, split_type) -> None:
@@ -233,24 +254,3 @@ def Parse(test_name : str, input_text : str, kit : Kit,  input_type : str, input
                     ParserForKeys(test_name, input_text, kit, "\\n")
                 case "answer":
                     ParserForAnswerUnderQuestion(test_name, input_text, kit, "\\n")
-
-
-
-input_text = """
-Хрящевые рыбы относятся к надклассу 
-*Gnathostomata
-Agnatha
-Cyclostomata
-Acrania
-
-Выберите правильное латинское название для класса Пластиножаберные
-*Elasmosranchii
-Holocephali
-Chondrichthyes
-Lamellibranchia
-
-kit = Kit("АДЬЫ")
-Parse("Касатки", input_text, kit, "symbol")
-for test in kit.GetTests():
-    for task in test.GetTasks():
-        print(task.GetQuestion())"""

@@ -477,6 +477,34 @@ class Database:
             print("Ошибка получения данных из БД "+str(e))
 
         return False
+    
+    def get_test_name_by_test_id(self, test_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT test_name FROM Test WHERE test_id = {test_id}")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res[0][0]
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
+
+    def get_kit_by_kit_id(self, kit_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT test_name FROM Kit WHERE kit_id = {kit_id}")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
 
     def SetConn(self):
         self.__conn = self.__conn = psycopg2.connect(database=cfg.db_name, user=cfg.db_user, host=cfg.db_host, password=cfg.db_password)

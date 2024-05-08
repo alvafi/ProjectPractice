@@ -1,18 +1,19 @@
 import sqlite3
 import psycopg2
 import os
-from flask import Flask, flash, request, redirect, url_for, g, render_template
+from flask import Flask, flash, request, redirect, url_for, g, render_template, send_file
 
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from Config import db_name, hanle_input, file_input
 from database import Database
-from Forms import RegisterForm, LoginForm, AddTaskForm, AddBankForm, ChangeName
+from Forms import RegisterForm, LoginForm, AddTaskForm, AddTaskToExistingKitForm, AddBankForm, ChangeName, ExportTestForm
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from UserLogin import UserLogin
 from Parser import Parse
 from TestClasses.Kit import Kit
-from Interface import add_kit_content, delete_bank, delete_kit, edit_bank_name, edit_kit_name
+from Interface import add_kit_content, delete_bank, delete_kit, edit_bank_name, edit_kit_name, edit_test_name, delete_test, add_kit_content_to_existing_kit
+from Export import Export
 
 DATABASE = f'/tmp/{db_name}.db'
 DEBUG = True
@@ -38,7 +39,6 @@ def create_upload_folder():
 
 @login_manager.user_loader
 def load_user(user_id):
-    print("load_user")
     return UserLogin().fromDB(user_id, dbase)
 
 # создание таблицы потом нужно понять где вызывать
@@ -153,6 +153,35 @@ def addTest():
         return redirect(url_for('showBanks'))
     return render_template('add_test.html', title = "Добавление теста", form = form)
 
+
+@app.route('/add_test_to_kit/<kit_id>', methods=["POST", "GET"])
+@login_required
+def addTestToExistingKit(kit_id):
+    form = AddTaskToExistingKitForm() 
+    if form.validate_on_submit():
+        kit = Kit(form.name.data)
+        if form.file.data:
+            create_upload_folder()
+            filename = secure_filename(form.file.data.filename)
+            form.file.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'r', encoding='utf8') as file:
+                input = file.read()
+            Parse(form.name.data, input, kit, form.test_mode.data, file_input)
+        elif form.text.data:
+            input = form.text.data
+            Parse(form.name.data, input, kit, form.test_mode.data, hanle_input)
+        else:
+            flash("Введите текст или загрузите файл", "error")
+            return(redirect(url_for('addTestToExistingKit', kit_id = kit_id)))
+        
+        
+        if add_kit_content_to_existing_kit(dbase, kit, kit_id):
+            flash("Тест добавлен", "success")
+        else:
+            flash("Произошла ошибка при добавлении теста", "error")
+        return redirect(url_for('showBanks'))
+    return render_template('add_test_to_existing_kit.html', title = "Добавление теста", form = form, kit_id = kit_id)
+
 @app.route('/my_banks', methods=["POST", "GET"])
 @login_required
 def showBanks():
@@ -222,8 +251,50 @@ def changeKitName(kit_id):
         else:
             flash("Произошла ошибка при изменении названия", "error")
             return redirect(url_for('showBanks'))
-    return render_template('change_name.html', form = form)
+    return render_template('change_name.html', kit_id = kit_id, form = form)
 
+@app.route('/change_test_name/<test_id>', methods=["POST", "GET"])
+@login_required
+def changeTestName(test_id):
+    form = ChangeName()
+    if form.validate_on_submit():
+        if edit_test_name(dbase, test_id, form.name.data):
+            flash("Название успешно изменино", "success")
+            return redirect(url_for('showBanks'))
+        else:
+            flash("Произошла ошибка при изменении названия", "error")
+            return redirect(url_for('showBanks'))
+    return render_template('change_name.html', test_id = test_id, form = form)
+
+
+@app.route('/export_test/<test_id>', methods=["POST", "GET"])
+@login_required
+def exportTest(test_id):
+    form = ExportTestForm()
+    if form.validate_on_submit():
+        data = Export(dbase, test_id, form.export_type.data)
+        if data:
+            test_name = dbase.get_test_name_by_test_id(test_id)
+            print(test_name)
+            if not test_name:
+                test_name = "test"
+            
+            flash("Тест успешно экспортирован", "success")
+            return send_file(data, as_attachment=True, download_name=str(test_name + '.' +  form.export_type.data))
+            
+        else:
+            flash("Произошла ошибка при экспорте теста", "error")
+            return redirect(url_for('showBanks'))
+    return render_template("export_test.html", form = form)
+
+@app.route('/delete_test/<test_id>', methods=["POST", "GET"])
+@login_required
+def deleteTest(test_id):
+    if delete_test(dbase, test_id):
+        flash("Тест удален", "success")
+    else:
+        flash("Ошибка при удалении теста", "error")
+    return redirect (url_for('showBanks'))
 
 if __name__ == "__main__":
     app.run(debug=True)
