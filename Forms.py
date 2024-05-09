@@ -57,3 +57,8 @@ class ChangeName(FlaskForm):
 class ExportTestForm(FlaskForm):
     export_type = SelectField("Выберите формат загрузки:", choices=[(XML_mode, "MoodleXML"), (IMS_QTI_mode, "IMS QTI")])
     submit = SubmitField("Экспорт")
+
+class ChangeAnswerForm(FlaskForm):
+    name = StringField("Текст ответа:", validators=[Length(min=1, max=200, message="Ответ должен содержать от 1 до 200 символов")])
+    is_right = BooleanField("Ответ правильный")
+    submit = SubmitField("Изменить")

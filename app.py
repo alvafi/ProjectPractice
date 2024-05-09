@@ -6,13 +6,13 @@ from flask import Flask, flash, request, redirect, url_for, g, render_template, 
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from Config import db_name, hanle_input, file_input
 from database import Database
-from Forms import RegisterForm, LoginForm, AddTaskForm, AddTaskToExistingKitForm, AddBankForm, ChangeName, ExportTestForm
+from Forms import RegisterForm, LoginForm, AddTaskForm, AddTaskToExistingKitForm, AddBankForm, ChangeName, ExportTestForm, ChangeAnswerForm
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from UserLogin import UserLogin
 from Parser import Parse
 from TestClasses.Kit import Kit
-from Interface import add_kit_content, delete_bank, delete_kit, edit_bank_name, edit_kit_name, edit_test_name, delete_test, add_kit_content_to_existing_kit
+from Interface import add_kit_content, delete_bank, delete_kit, edit_bank_name, edit_kit_name, edit_test_name, delete_test, add_kit_content_to_existing_kit, delete_task, edit_task_question, edit_answer, delete_answer, add_answer
 from Export import Export
 
 DATABASE = f'/tmp/{db_name}.db'
@@ -221,12 +221,6 @@ def deleteKit(kit_id):
     return redirect (url_for('showBanks'))
 
 
-@app.route('/show_test/<test_id>', methods=["POST", "GET"])
-@login_required
-def showTest(test_id):
-    res = dbase.get_tasks_by_test_id(test_id)
-    return render_template('show_tests.html', dbase = dbase, tasks = res)
-
 @app.route('/change_bank_name/<bank_id>', methods=["POST", "GET"])
 @login_required
 def changeBankName(bank_id):
@@ -287,6 +281,14 @@ def exportTest(test_id):
             return redirect(url_for('showBanks'))
     return render_template("export_test.html", form = form)
 
+
+@app.route('/show_test/<test_id>', methods=["POST", "GET"])
+@login_required
+def showTest(test_id):
+    res = dbase.get_tasks_by_test_id(test_id)
+    return render_template('show_tests.html', dbase = dbase, tasks = res, test_id = test_id)
+
+
 @app.route('/delete_test/<test_id>', methods=["POST", "GET"])
 @login_required
 def deleteTest(test_id):
@@ -295,6 +297,79 @@ def deleteTest(test_id):
     else:
         flash("Ошибка при удалении теста", "error")
     return redirect (url_for('showBanks'))
+
+@app.route('/edit_task/<task_id>/<test_id>', methods=["POST", "GET"])
+@login_required
+def editTask(task_id, test_id):
+    return render_template('show_task.html', dbase = dbase, task_id = task_id, test_id = test_id)
+
+@app.route('/delete_task/<task_id>/<test_id>', methods=["POST", "GET"])
+@login_required
+def deleteTask(task_id, test_id):
+    if delete_task(dbase, task_id):
+        flash("Задание удалено", "success")
+    else:
+        flash("Ошибка при удалении задания", "error")
+    return redirect (url_for('showTest', test_id = test_id))
+
+@app.route('/change_question_name/<task_id>/<test_id>', methods=["POST", "GET"])
+@login_required
+def changeQuestionName(task_id, test_id):
+    form = ChangeName()
+    if form.validate_on_submit():
+        if edit_task_question(dbase, task_id, form.name.data):
+            flash("Название успешно изменино", "success")
+            return redirect(url_for('editTask', task_id = task_id, test_id = test_id))
+        else:
+            flash("Произошла ошибка при изменении названия", "error")
+            return redirect(url_for('editTask', task_id = task_id, test_id = test_id))
+    else:
+        form.name.data = dbase.get_question_by_task_id(task_id)
+    return render_template('change_name.html', task_id = task_id,  form = form)
+
+@app.route('/change_answer/<answer_id>/<task_id>/<test_id>', methods=["POST", "GET"])
+@login_required
+def changeAnswer(answer_id, task_id, test_id):
+    form = ChangeAnswerForm()
+    if form.validate_on_submit():
+        if edit_answer(dbase, answer_id, form.name.data, form.is_right.data):
+            flash("Ответ успешно изменен", "success")
+            return redirect(url_for('editTask', task_id = task_id, test_id = test_id))
+        else:
+            flash("Произошла ошибка при изменении ответа", "error")
+            return redirect(url_for('editTask', answer_id = answer_id, task_id = task_id, test_id = test_id))
+    else:
+        res = dbase.get_answer_by_answer_id(answer_id)
+        if res:
+            form.name.data = res[0][0]
+        form.is_right.data = res[0][1]
+    
+    return render_template('change_name.html', task_id = task_id,  form = form)
+
+@app.route('/add_answer/<task_id>/<test_id>', methods=["POST", "GET"])
+@login_required
+def addAnswer(task_id, test_id):
+    form = ChangeAnswerForm()
+    form.submit.label.text = "Добавить"
+    if form.validate_on_submit():
+        if add_answer(dbase, task_id, form.name.data, form.is_right.data):
+            flash("Ответ успешно добавлен", "success")
+            return redirect(url_for('editTask', task_id = task_id, test_id = test_id))
+        else:
+            flash("Произошла ошибка при добавлении ответа", "error")
+            return redirect(url_for('editTask', task_id = task_id, test_id = test_id))
+    return render_template('change_name.html', task_id = task_id,  form = form)
+
+@app.route('/delete_task/<answer_id>/<task_id>/<test_id>', methods=["POST", "GET"])
+@login_required
+def deleteAnswer(answer_id, task_id, test_id):
+    if delete_answer(dbase, answer_id):
+        flash("Ответ удален", "success")
+    else:
+        flash("Ошибка при удалении ответа", "error")
+    return redirect(url_for('editTask', task_id = task_id, test_id = test_id))
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

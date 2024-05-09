@@ -106,6 +106,12 @@
   
   }
   
+  .task {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   .subkit {
     background-color: rgba(161, 171, 180, 1);
     display: flex;
@@ -192,6 +198,16 @@
   .new_bank_button {
     margin-left: 8%;
     margin-right: 8%;
+  }
+
+  .add_answer_button {
+    background-color: rgba(66, 96, 126);
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
   }
 
   h2 {

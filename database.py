@@ -505,6 +505,36 @@ class Database:
             print("Ошибка получения данных из БД "+str(e))
 
         return False
+    
+    def get_question_by_task_id(self, task_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT question_text FROM Task WHERE task_id = {task_id}")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res[0][0]
+        
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
+    
+    def get_answer_by_answer_id(self, answer_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT answer_text, is_right FROM Answer WHERE answer_id = {answer_id}")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res
+        
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
 
     def SetConn(self):
         self.__conn = self.__conn = psycopg2.connect(database=cfg.db_name, user=cfg.db_user, host=cfg.db_host, password=cfg.db_password)
