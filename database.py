@@ -16,7 +16,8 @@ class Database:
                 middle_name text,
                 email text NOT NULL UNIQUE,
                 login text NOT NULL UNIQUE,
-                password text NOT NULL
+                password text NOT NULL,
+                avatar BYTEA DEFAULT NULL
             )
         ''')
         cur.execute('''
@@ -333,6 +334,30 @@ class Database:
 
         return True, ""
 
+    def get_user_avatar(self, user_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT avatar FROM Users WHERE user_id = {user_id} LIMIT 1")
+            res = cur.fetchone()
+            if not res:
+                return False
+            return res
+        
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+        return False
+
+    
+    def update_user_avatar(self, user_id, avatar):
+        try:
+            binary = sqlite3.Binary(avatar)
+            cur = self.__conn.cursor()
+            cur.execute(f"UPDATE Users SET avatar = %s WHERE user_id = %s", (binary, user_id))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False
+        return True
+
     def get_user_by_id(self, user_id):
         try:
             cur = self.__conn.cursor()
@@ -349,7 +374,8 @@ class Database:
             "middle_name": res[3],
             "email": res[4],
             "login": res[5],
-            "password": res[6]
+            "password": res[6],
+            "avatar" : res[7]
             }
             return user_dict
         
@@ -374,7 +400,8 @@ class Database:
             "middle_name": res[3],
             "email": res[4],
             "login": res[5],
-            "password": res[6]
+            "password": res[6],
+            "avatar" : res[7]
             }
             return user_dict
         
@@ -492,15 +519,29 @@ class Database:
 
         return False
 
-    def get_kit_by_kit_id(self, kit_id):
+    def get_bank_name_by_bank_id(self, bank_id):
         try:
             cur = self.__conn.cursor()
-            cur.execute(f"SELECT test_name FROM Kit WHERE kit_id = {kit_id}")
+            cur.execute(f"SELECT bank_name FROM Bank WHERE bank_id = {bank_id}")
             res = cur.fetchall()
             if not res:
                 return False
 
-            return res
+            return res[0][0]
+        except sqlite3.Error as e:
+            print("Ошибка получения данных из БД "+str(e))
+
+        return False
+
+    def get_kit_name_by_kit_id(self, kit_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT kit_name FROM Kit WHERE kit_id = {kit_id}")
+            res = cur.fetchall()
+            if not res:
+                return False
+
+            return res[0][0]
         except sqlite3.Error as e:
             print("Ошибка получения данных из БД "+str(e))
 

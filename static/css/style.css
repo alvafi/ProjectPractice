@@ -198,6 +198,7 @@
   .new_bank_button {
     margin-left: 8%;
     margin-right: 8%;
+    
   }
 
   .add_answer_button {
@@ -255,4 +256,8 @@
   .flash.error {
     border: 1px solid #FF4343;
     background: #FF9C9C;
+  }
+
+  .invalid-feedback {
+    color: #FF4343;
   }

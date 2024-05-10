@@ -6,7 +6,7 @@ from TestClasses.Task import Task
 from TestClasses.Kit import Kit
 from database import Database
 from random import sample
-
+from PIL import Image
 
 # Создание теста для уже существующих заданий
 def make_test(dbase, kit_id, test_name: str, task_amount: int):
@@ -282,3 +282,8 @@ def delete_answer(dbase, answer_id: int):
         return False
 
     return True
+
+def resize_image(input_image_path, output_image_path):
+    original_image = Image.open(input_image_path)
+    resized_image = original_image.resize((60, 60))
+    resized_image.save(output_image_path)

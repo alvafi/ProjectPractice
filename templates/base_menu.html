@@ -2,16 +2,16 @@
 
 {% block content %}
 {{ super() }}
-  <div class="main">
-    <div class="container">
-      <div class="main_nav">
-        <a class="main_nav_item" href="{{url_for('addTest')}}">Загрузить задания</a>
-        <a class="main_nav_item" href="{{url_for('showBanks')}}">Мои наборы</a>
-        <a class="main_nav_item" href="Export.html">Экспортировать задания</a>
-        <a class="main_nav_item" href="Test.html">Создать тест</a>
-      </div>
+<body>
+    <div class="main">
+        <div class="container">
+            <div class="main_nav">
+                <a class="main_nav_item" href="{{url_for('addTest')}}">Загрузить задания</a>
+                <a class="main_nav_item" href="{{url_for('showBanks')}}">Мои наборы</a>
+                <a class="main_nav_item" href="Export.html">Экспортировать задания</a>
+                <a class="main_nav_item" href="Test.html">Создать тест</a>
+            </div>
+        </div>
     </div>
-  </div>
-
 </body>
 {% endblock %}

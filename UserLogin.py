@@ -21,10 +21,12 @@ class UserLogin(UserMixin):
     
     def GetLastName(self):
         return str(self.__user['last_name'])
-    
 
     def GetLogin(self):
         return self.__user['login'] if self.__user else "Без логина"
 
     def GetEmail(self):
         return self.__user['email'] if self.__user else "Без email"
+
+    def GetAvatar(self):
+        return self.__user['avatar'] if self.__user else None

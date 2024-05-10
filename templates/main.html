@@ -2,9 +2,8 @@
 
 {% block content %}
 {{ super() }}
-<p class="kits">Наш сервис помогает в создание банков тестовых заданий.</p>
-<p class="kits"><a href="{{ url_for('login') }}"> Авторизуйтесь</a>, чтобы получить доступ к функционалу сайта</p>
-
+<body>
+    <p class="kits">Наш сервис помогает в создание банков тестовых заданий.</p>
+    <p class="kits"><a href="{{ url_for('login') }}"><span style="color: blue;"> Авторизуйтесь</span></a>, чтобы получить доступ к функционалу сайта</p>
 </body>
 {% endblock %}
-</html>

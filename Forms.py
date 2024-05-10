@@ -5,6 +5,13 @@ from wtforms.widgets import TextArea
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from Config import symbol_mode, key_mode, answer_under_question_mode, XML_mode, IMS_QTI_mode
 
+class UploadAvatarForm(FlaskForm):
+    file = FileField("Выбрать файл", validators=[FileAllowed(['png'],  message="not_png")])
+    submit = SubmitField("Загрузить")
+
+    def __init__(self, *args, **kwargs):
+        super(UploadAvatarForm, self).__init__(*args, **kwargs)
+        self.enctype = 'multipart/form-data'
 
 class LoginForm(FlaskForm):
     email = StringField("Email: ", validators=[Email("Некорректный email")])
@@ -27,8 +34,8 @@ class AddTaskForm(FlaskForm):
     bank_id = SelectField("Загрузить в набор:", choices=[], validators=[DataRequired(message="Для добавления теста у вас должен быть создан хотя бы один набор")])
     test_mode = SelectField("Формат теста:", choices=[(symbol_mode, "Символы"), (key_mode, "Ключи"), (answer_under_question_mode, "Ответы под вопросами")])
     name = StringField("Название:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
-    text = StringField("Введите текст", widget=TextArea(), render_kw={"maxlength": "3700"})
-    file = FileField("Загрузить файл")
+    text = StringField("Введите текст", widget=TextArea(), render_kw={"maxlength": "5000"})
+    file = FileField("Загрузить файл", validators=[FileAllowed(['txt'],  message="not_type")])
     submit = SubmitField("Добавить")
 
     def __init__(self, *args, **kwargs):
@@ -39,7 +46,7 @@ class AddTaskToExistingKitForm(FlaskForm):
     test_mode = SelectField("Формат теста:", choices=[(symbol_mode, "Символы"), (key_mode, "Ключи"), (answer_under_question_mode, "Ответы под вопросами")])
     name = StringField("Название:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
     text = StringField("Введите текст", widget=TextArea(), render_kw={"maxlength": "3700"})
-    file = FileField("Загрузить файл")
+    file = FileField("Загрузить файл", validators=[FileAllowed(['txt'],  message="not_type")])
     submit = SubmitField("Добавить")
 
     def __init__(self, *args, **kwargs):
@@ -62,3 +69,8 @@ class ChangeAnswerForm(FlaskForm):
     name = StringField("Текст ответа:", validators=[Length(min=1, max=200, message="Ответ должен содержать от 1 до 200 символов")])
     is_right = BooleanField("Ответ правильный")
     submit = SubmitField("Изменить")
+
+class AddTestForm(FlaskForm):
+    question = StringField("Вопрос:", validators=[Length(min=1, max=200, message="Вопрос должен содержать от 1 до 200 символов")])
+    answer = StringField("Ответ:", validators=[Length(min=1, max=200, message="Ответ должен содержать от 1 до 200 символов")])
+    is_right = BooleanField("Ответ правильный")

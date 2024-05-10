@@ -1,25 +1,25 @@
 import sqlite3
 import psycopg2
 import os
-from flask import Flask, flash, request, redirect, url_for, g, render_template, send_file
+from flask import Flask, flash, request, redirect, url_for, g, render_template, send_file, make_response
 
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from Config import db_name, hanle_input, file_input
 from database import Database
-from Forms import RegisterForm, LoginForm, AddTaskForm, AddTaskToExistingKitForm, AddBankForm, ChangeName, ExportTestForm, ChangeAnswerForm
+from Forms import RegisterForm, LoginForm, AddTaskForm, AddTaskToExistingKitForm, AddBankForm, ChangeName, ExportTestForm, ChangeAnswerForm, UploadAvatarForm
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from UserLogin import UserLogin
 from Parser import Parse
 from TestClasses.Kit import Kit
-from Interface import add_kit_content, delete_bank, delete_kit, edit_bank_name, edit_kit_name, edit_test_name, delete_test, add_kit_content_to_existing_kit, delete_task, edit_task_question, edit_answer, delete_answer, add_answer
+from Interface import add_kit_content, delete_bank, delete_kit, edit_bank_name, edit_kit_name, edit_test_name, delete_test, add_kit_content_to_existing_kit, delete_task, edit_task_question, edit_answer, delete_answer, add_answer, resize_image
 from Export import Export
 
 DATABASE = f'/tmp/{db_name}.db'
 DEBUG = True
 ALLOWED_EXTENSIONS = set(['txt', 'pdf'])
 SECRET_KEY = 'fc67934b56faafe32815'
-MAX_CONTENT_LENGTH = 1024 * 8
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 
 UPLOAD_FOLDER = 'uploads'
 
@@ -122,6 +122,47 @@ def profile():
     return render_template("profile.html", title="Профиль")
 
 
+@app.route('/user_avatar')
+@login_required
+def userAvatar():
+    img = current_user.GetAvatar()
+    if not img:
+        return ""
+    h = make_response(bytes(img))
+    h.headers['Content-Type'] = 'image/png'
+    return h
+
+@app.route('/upload_avatar', methods=["POST", "GET"])
+@login_required
+def uploadAvatar():
+    form = UploadAvatarForm()
+    if form.validate_on_submit():
+        if form.file.data:
+            try:
+                create_upload_folder()
+                filename = secure_filename(form.file.data.filename)
+                file_dir = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                form.file.data.save(file_dir)
+                resize_image(file_dir, file_dir)
+                with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'rb') as file:
+                    img = file.read()
+
+                res = dbase.update_user_avatar(current_user.get_id(), img)
+                if not res:
+                    flash("Ошибка обновления аватара", "error")
+                flash("Аватар обновлен", "success")
+                return redirect(url_for('profile'))
+            except FileNotFoundError as e:
+                flash("Ошибка чтения файла", "error")
+        else:
+            flash("Загрузите файл", "error")
+    elif form.file.errors:
+        error_message = form.file.errors[0]
+        if error_message == 'not_png':
+            flash("Загружаемый файл должен иметь тип png", "error")
+
+    return render_template('update_avatar.html', form = form)
+
 @app.route('/add_test', methods=["POST", "GET"])
 @login_required
 def addTest():
@@ -145,12 +186,16 @@ def addTest():
             flash("Введите текст или загрузите файл", "error")
             return(redirect(url_for('addTest')))
         
-        
         if add_kit_content(dbase, kit, form.bank_id.data):
             flash("Тест добавлен", "success")
         else:
             flash("Произошла ошибка при добавлении теста", "error")
         return redirect(url_for('showBanks'))
+    
+    elif form.file.errors:
+        error_message = form.file.errors[0]
+        if error_message == 'not_type':
+            flash("Загружаемый файл должен иметь тип txt", "error")
     return render_template('add_test.html', title = "Добавление теста", form = form)
 
 
@@ -180,6 +225,11 @@ def addTestToExistingKit(kit_id):
         else:
             flash("Произошла ошибка при добавлении теста", "error")
         return redirect(url_for('showBanks'))
+    
+    elif form.file.errors:
+        error_message = form.file.errors[0]
+        if error_message == 'not_type':
+            flash("Загружаемый файл должен иметь тип txt", "error")
     return render_template('add_test_to_existing_kit.html', title = "Добавление теста", form = form, kit_id = kit_id)
 
 @app.route('/my_banks', methods=["POST", "GET"])
@@ -232,6 +282,10 @@ def changeBankName(bank_id):
         else:
             flash("Произошла ошибка при изменении названия", "error")
             return redirect(url_for('showBanks'))
+    else:
+        bank_name = dbase.get_bank_name_by_bank_id(bank_id)
+        if bank_name:
+            form.name.data = bank_name
     return render_template('change_name.html', bank_id = bank_id,  form = form)
 
 @app.route('/change_kit_name/<kit_id>', methods=["POST", "GET"])
@@ -245,6 +299,10 @@ def changeKitName(kit_id):
         else:
             flash("Произошла ошибка при изменении названия", "error")
             return redirect(url_for('showBanks'))
+    else:
+        kit_name = dbase.get_kit_name_by_kit_id(kit_id)
+        if kit_name:
+            form.name.data = kit_name
     return render_template('change_name.html', kit_id = kit_id, form = form)
 
 @app.route('/change_test_name/<test_id>', methods=["POST", "GET"])
@@ -258,6 +316,10 @@ def changeTestName(test_id):
         else:
             flash("Произошла ошибка при изменении названия", "error")
             return redirect(url_for('showBanks'))
+    else:
+        test_name = dbase.get_test_name_by_test_id(test_id)
+        if test_name:
+            form.name.data = test_name
     return render_template('change_name.html', test_id = test_id, form = form)
 
 
@@ -368,7 +430,6 @@ def deleteAnswer(answer_id, task_id, test_id):
     else:
         flash("Ошибка при удалении ответа", "error")
     return redirect(url_for('editTask', task_id = task_id, test_id = test_id))
-
 
 
 if __name__ == "__main__":

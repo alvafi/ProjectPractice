@@ -3,14 +3,16 @@
 {% block content %}
 {{ super() }}
 {% for cat, msg in get_flashed_messages(True) %}
-<div class="flash {{cat}}">{{msg}}</div>
+	<div class="flash {{cat}}">{{msg}}</div>
 {% endfor %}
-<div class="container">
-	<div class="info">
-		<h3>{{ current_user.GetLastName() }} {{ current_user.GetFirstName() }} {{ current_user.GetMiddleName() }}</h3>
-		<p>Электронная почта: {{ current_user.GetEmail() }}</p>
-		<p>Логин: {{ current_user.GetLogin() }}</p>
-		
+<body>
+	<div class="container">
+		<div class="info">
+			<h3>{{ current_user.GetLastName() }} {{ current_user.GetFirstName() }} {{ current_user.GetMiddleName() }}</h3>
+			<p>Электронная почта: {{ current_user.GetEmail() }}</p>
+			<p>Логин: {{ current_user.GetLogin() }}</p>
+			<a href="{{ url_for('uploadAvatar') }}"> Загрузить аватар</a> 
+		</div>
 	</div>
-</div>
+</body>
 {% endblock %}
