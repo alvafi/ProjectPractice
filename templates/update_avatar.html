@@ -10,7 +10,7 @@
 		<form action=""  method="post" enctype="multipart/form-data" class="container_registration">
 			{{ form.hidden_tag() }}
 			{% for field in form if field.name not in ['csrf_token', 'submit'] -%}
-				<p>{{ field.label() }}</p>
+				<p class="info_item">{{ field.label() }}</p>
 				{% if field.errors %}
 					{{ field(class="invalid") }}
 					{% if 'not_png' not in field.errors %}
@@ -21,10 +21,10 @@
 						</span>
 					{% endif %}
 				{% else %}
-					{{ field() }}
+					<p class="info_item">{{ field() }}</p>
 				{% endif %}
 			{% endfor %}
-			<p>{{ form.submit() }}
+			<p class="info_item">{{ form.submit() }}</p>
 		</form>
 	</div>
 </body>

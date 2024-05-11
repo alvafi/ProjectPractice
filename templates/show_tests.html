@@ -37,6 +37,8 @@
             {% else %}
                 <p class=""> В этом тесте нет вопросов </p>
             {% endif %}
+            <a href="{{ url_for('addTask', test_id = test_id) }}" class="add_answer_button">Добавить задние</a>
+            <a href="{{ url_for('showBanks') }}" class="add_answer_button">Назад</a>
         </div>
     </div>
 </body>

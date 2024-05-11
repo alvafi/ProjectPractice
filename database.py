@@ -165,6 +165,56 @@ class Database:
             return None, str(e)
 
         return cur.fetchone()[0], ""
+    
+    def update_user_name(self, user_id, first_name : str, last_name: str, middle_name : str):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute('''
+                UPDATE Users
+                SET last_name = %s, first_name = %s, middle_name = %s
+                WHERE user_id = %s
+            ''', (last_name, first_name, middle_name, user_id))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return False
+        return True
+    
+    def update_user_email(self, user_id, email : str):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT COUNT(*) as email_count FROM Users WHERE email LIKE '{email}'")
+            res = cur.fetchone()
+            if res[0] > 0:
+                return (False, "Пользователь с таким email уже существует")
+
+            cur.execute('''
+                UPDATE Users
+                SET email = %s
+                WHERE user_id = %s
+            ''', (email, user_id))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return (False, str(e))
+        return (True, '')
+    
+    def update_user_login(self, user_id, login : str):
+        try:
+            cur = self.__conn.cursor()   
+            cur.execute(f"SELECT COUNT(*) as login_count FROM Users WHERE login LIKE '{login}'")
+            res = cur.fetchone()
+            if res[0] > 0:
+                print()
+                return (False, "Пользователь с таким login уже существует")
+
+            cur.execute('''
+                UPDATE Users
+                SET login = %s
+                WHERE user_id = %s
+            ''', (login, user_id))
+            self.__conn.commit()
+        except sqlite3.Error as e:
+            return (False, str(e))
+        return (True, '')
 
     def update_bank_name(self, bank_id: int, new_bank_name: str):
         try:
@@ -455,6 +505,17 @@ class Database:
             print("Ошибка получения данных из БД "+str(e))
 
         return False
+
+    def get_kit_id_by_test_id(self, test_id):
+        try:
+            cur = self.__conn.cursor()
+            cur.execute(f"SELECT kit_id FROM Test WHERE test_id = {test_id} LIMIT 1")
+            res = cur.fetchall()
+            if not res:
+                return False
+            return res[0][0]
+        except sqlite3.Error as e:
+            return False
 
     def get_tasks_by_test_id(self, test_id):
         try:

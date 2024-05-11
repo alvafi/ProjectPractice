@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, BooleanField, PasswordField, FileField, SelectField
+from wtforms import StringField, SubmitField, BooleanField, PasswordField, FileField, SelectField, IntegerField, FieldList
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 from wtforms.widgets import TextArea
 from flask_wtf.file import FileField, FileAllowed, FileRequired
@@ -30,7 +30,7 @@ class RegisterForm(FlaskForm):
     conf_flag = BooleanField("Согласие на обработку и хранение данных", validators=[DataRequired()])
     submit = SubmitField("Регистрация")
 
-class AddTaskForm(FlaskForm):
+class AddTestForm(FlaskForm):
     bank_id = SelectField("Загрузить в набор:", choices=[], validators=[DataRequired(message="Для добавления теста у вас должен быть создан хотя бы один набор")])
     test_mode = SelectField("Формат теста:", choices=[(symbol_mode, "Символы"), (key_mode, "Ключи"), (answer_under_question_mode, "Ответы под вопросами")])
     name = StringField("Название:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
@@ -39,10 +39,10 @@ class AddTaskForm(FlaskForm):
     submit = SubmitField("Добавить")
 
     def __init__(self, *args, **kwargs):
-        super(AddTaskForm, self).__init__(*args, **kwargs)
+        super(AddTestForm, self).__init__(*args, **kwargs)
         self.enctype = 'multipart/form-data'
 
-class AddTaskToExistingKitForm(FlaskForm):
+class AddTestToExistingKitForm(FlaskForm):
     test_mode = SelectField("Формат теста:", choices=[(symbol_mode, "Символы"), (key_mode, "Ключи"), (answer_under_question_mode, "Ответы под вопросами")])
     name = StringField("Название:", validators=[Length(min=1, max=200, message="Название должно содержать от 1 до 200 символов")])
     text = StringField("Введите текст", widget=TextArea(), render_kw={"maxlength": "3700"})
@@ -50,7 +50,7 @@ class AddTaskToExistingKitForm(FlaskForm):
     submit = SubmitField("Добавить")
 
     def __init__(self, *args, **kwargs):
-        super(AddTaskToExistingKitForm, self).__init__(*args, **kwargs)
+        super(AddTestToExistingKitForm, self).__init__(*args, **kwargs)
         self.enctype = 'multipart/form-data'
 
 class AddBankForm(FlaskForm):
@@ -70,7 +70,19 @@ class ChangeAnswerForm(FlaskForm):
     is_right = BooleanField("Ответ правильный")
     submit = SubmitField("Изменить")
 
-class AddTestForm(FlaskForm):
+
+class AddTaskForm(FlaskForm):
     question = StringField("Вопрос:", validators=[Length(min=1, max=200, message="Вопрос должен содержать от 1 до 200 символов")])
-    answer = StringField("Ответ:", validators=[Length(min=1, max=200, message="Ответ должен содержать от 1 до 200 символов")])
-    is_right = BooleanField("Ответ правильный")
+    answers = FieldList(StringField("Ответ", validators=[Length(min=1, max=200, message="Ответ должен содержать от 1 до 200 символов")]))
+    #is_right = FieldList(BooleanField("Ответ правильный"))
+    submit = SubmitField("Добавить задание")
+
+class NumberOfQuestionsForm(FlaskForm):
+    number_of_questions = IntegerField("Количество ответов:", validators=[DataRequired(message="Введите количество ответов")])
+    submit = SubmitField("Далее")
+
+class ChangeUserNameForm(FlaskForm):
+    first_name = StringField("Имя:", validators=[Length(min=0, max=20, message="Имя должно быть не больше 20 символов")])
+    last_name = StringField("Фамилия:", validators=[Length(min=0, max=20, message="Имя должно быть не больше 20 символов")])
+    middle_name = StringField("Отчество:", validators=[Length(min=0, max=20, message="Имя должно быть не больше 20 символов")])
+    submit = SubmitField("Изменить")

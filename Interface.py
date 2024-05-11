@@ -76,24 +76,24 @@ def add_answer(dbase, task_id, answer_text: str, is_right: bool):
 def add_kit_content(dbase, kit: Kit, bank_id):
     # Добавление набора
     kit_id = add_kit(dbase, bank_id, kit.GetName())
-    if not (kit_id):
+    if not kit_id:
         return False
 
     # Добавление тестов
     for test in kit.GetTests():
         test_id = add_test(dbase, kit_id, test.GetName())
-        if not (test_id):
+        if not test_id:
             return False
 
         # Добавление заданий
         for task in test.GetTasks():
             task_id = add_task(dbase, kit_id, test_id, task.GetQuestion())
-            if not (task_id):
+            if not task_id:
                 return False
             # Добавление ответа
             for answer in task.GetAnswers():
                 answer_id = add_answer(dbase, task_id, answer.GetText(), answer.IsRight())
-                if not (answer_id):
+                if not answer_id:
                     return False
     return True
 
@@ -101,21 +101,32 @@ def add_kit_content_to_existing_kit(dbase, kit: Kit, kit_id):
     # Добавление тестов
     for test in kit.GetTests():
         test_id = add_test(dbase, kit_id, test.GetName())
-        if not (test_id):
+        if not test_id:
             return False
 
         # Добавление заданий
         for task in test.GetTasks():
             task_id = add_task(dbase, kit_id, test_id, task.GetQuestion())
-            if not (task_id):
+            if not task_id:
                 return False
             # Добавление ответа
             for answer in task.GetAnswers():
                 answer_id = add_answer(dbase, task_id, answer.GetText(), answer.IsRight())
-                if not (answer_id):
+                if not answer_id:
                     return False
     return True
 
+# Добавление содержимого задания в бд
+def add_task_content(dbase, task: Task, test_id):
+    kit_id = dbase.get_kit_id_by_test_id(test_id)
+    task_id = add_task(dbase, kit_id, test_id, task.GetQuestion())
+    if not task_id:
+        return False
+
+    for answer in task.GetAnswers():
+        if not(add_answer(dbase, task_id, answer.GetText(), answer.IsRight())):
+            return False
+    return True
 
 # Удаление банка
 def delete_bank(dbase, bank_id):
@@ -184,8 +195,6 @@ def edit_bank_name(dbase, bank_id: int, new_bank_name: str):
     if not is_updated:
         print(error)
         return False
-
-    # bank.SetName(new_bank_name)
     return True
 
 # Редактирование имени набора
@@ -194,8 +203,6 @@ def edit_kit_name(dbase, kit_id: int, new_kit_name: str):
     if not is_updated:
         print(error)
         return False
-
-    # kit.SetName(new_kit_name)
     return True
 
 # Редактирование имени теста
@@ -204,8 +211,6 @@ def edit_test_name(dbase, test_id: int, new_test_name: str):
     if not is_updated:
         print(error)
         return False
-
-    # test.SetName(new_test_name)
     return True
 
 # Редактирование вопроса
@@ -214,8 +219,6 @@ def edit_task_question(dbase, task_id: int, new_task_question: str):
     if not is_updated:
         print(error)
         return False
-
-    # task.SetQuestion(new_task_question)
     return True
 
 # Редактирование ответа и правильности ответа
@@ -224,9 +227,6 @@ def edit_answer(dbase, answer_id: int, new_answer_text: str, new_is_right: bool)
     if not is_updated:
         print(error)
         return False
-
-    # answer.SetAnswerText(new_answer_text)
-    # answer.SetIsRight(new_is_right)
     return True
 
 # Удаление пользователя
@@ -283,6 +283,7 @@ def delete_answer(dbase, answer_id: int):
 
     return True
 
+# Изменение разрешения аватарки
 def resize_image(input_image_path, output_image_path):
     original_image = Image.open(input_image_path)
     resized_image = original_image.resize((60, 60))

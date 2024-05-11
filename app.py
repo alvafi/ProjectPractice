@@ -1,18 +1,18 @@
-import sqlite3
-import psycopg2
 import os
 from flask import Flask, flash, request, redirect, url_for, g, render_template, send_file, make_response
-
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from Config import db_name, hanle_input, file_input
 from database import Database
-from Forms import RegisterForm, LoginForm, AddTaskForm, AddTaskToExistingKitForm, AddBankForm, ChangeName, ExportTestForm, ChangeAnswerForm, UploadAvatarForm
+from Forms import RegisterForm, LoginForm, AddTestForm, AddTestToExistingKitForm, AddBankForm, ChangeName, ExportTestForm, ChangeAnswerForm, UploadAvatarForm, NumberOfQuestionsForm, AddTaskForm, ChangeUserNameForm
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from wtforms.validators import Email
 from UserLogin import UserLogin
 from Parser import Parse
 from TestClasses.Kit import Kit
-from Interface import add_kit_content, delete_bank, delete_kit, edit_bank_name, edit_kit_name, edit_test_name, delete_test, add_kit_content_to_existing_kit, delete_task, edit_task_question, edit_answer, delete_answer, add_answer, resize_image
+from TestClasses.Task import Task
+from TestClasses.Answer import Answer
+from Interface import add_kit_content, delete_bank, delete_kit, edit_bank_name, edit_kit_name, edit_test_name, delete_test, add_kit_content_to_existing_kit, delete_task, edit_task_question, edit_answer, delete_answer, add_answer, resize_image, add_task_content
 from Export import Export
 
 DATABASE = f'/tmp/{db_name}.db'
@@ -119,8 +119,56 @@ def logout():
 @app.route('/profile')
 @login_required
 def profile():
-    return render_template("profile.html", title="Профиль")
+    return render_template("profile.html")
 
+@app.route('/change_name', methods=["POST", "GET"])
+@login_required
+def changeName():
+    form = ChangeUserNameForm()
+    if form.validate_on_submit():
+        if dbase.update_user_name(current_user.get_id(), form.first_name.data, form.last_name.data, form.middle_name.data):
+            flash("Имя успешно обновлено", "success")
+        else:
+            flash("Ошибка при обновлении имени", "error")
+        return redirect(url_for('profile'))
+    else:
+        form.first_name.data = current_user.GetFirstName()
+        form.last_name.data = current_user.GetLastName()
+        form.middle_name.data = current_user.GetMiddleName()
+    return render_template('change_name.html', form = form)
+
+@app.route('/change_email', methods=["POST", "GET"])
+@login_required
+def changeEmail():
+    form = ChangeName()
+    form.name.label.text = "Новый email:"
+    form.name.validators = [Email("Некорректный email")]
+    if form.validate_on_submit():
+        res =  dbase.update_user_email(current_user.get_id(), form.name.data)
+        if res[0]:
+            flash("Email успешно обновлен", "success")
+        else:
+            flash(res[1], "error")
+        return redirect(url_for('profile'))
+    else:
+        form.name.data = current_user.GetEmail()
+    return render_template('change_name.html', form = form)
+
+@app.route('/change_login', methods=["POST", "GET"])
+@login_required
+def changeLogin():
+    form = ChangeName()
+    form.name.label.text = "Новый логин:"
+    if form.validate_on_submit():
+        res =  dbase.update_user_login(current_user.get_id(), form.name.data)
+        if res[0]:
+            flash("Логин успешно обновлен", "success")
+        else:
+            flash(res[1], "error")
+        return redirect(url_for('profile'))
+    else:
+        form.name.data = current_user.GetLogin()
+    return render_template('change_name.html', form = form)
 
 @app.route('/user_avatar')
 @login_required
@@ -155,7 +203,7 @@ def uploadAvatar():
             except FileNotFoundError as e:
                 flash("Ошибка чтения файла", "error")
         else:
-            flash("Загрузите файл", "error")
+            flash("Выберите файл", "error")
     elif form.file.errors:
         error_message = form.file.errors[0]
         if error_message == 'not_png':
@@ -166,7 +214,7 @@ def uploadAvatar():
 @app.route('/add_test', methods=["POST", "GET"])
 @login_required
 def addTest():
-    form = AddTaskForm() 
+    form = AddTestForm() 
     res = dbase.get_banks_by_id(current_user.get_id())
     if res:
         form.bank_id.choices = [(bank_id, bank_name) for bank_id, bank_name in res]
@@ -178,14 +226,18 @@ def addTest():
             form.file.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'r', encoding='utf8') as file:
                 input = file.read()
-            Parse(form.name.data, input, kit, form.test_mode.data, file_input)
+            input_type = file_input            
         elif form.text.data:
             input = form.text.data
-            Parse(form.name.data, input, kit, form.test_mode.data, hanle_input)
+            input_type = hanle_input
         else:
             flash("Введите текст или загрузите файл", "error")
             return(redirect(url_for('addTest')))
         
+        if not(Parse(form.name.data, input, kit, form.test_mode.data, input_type)):
+                flash("Ошибка при обработке теста", "error")
+                return(redirect(url_for('addTest')))
+
         if add_kit_content(dbase, kit, form.bank_id.data):
             flash("Тест добавлен", "success")
         else:
@@ -202,7 +254,7 @@ def addTest():
 @app.route('/add_test_to_kit/<kit_id>', methods=["POST", "GET"])
 @login_required
 def addTestToExistingKit(kit_id):
-    form = AddTaskToExistingKitForm() 
+    form = AddTestToExistingKitForm() 
     if form.validate_on_submit():
         kit = Kit(form.name.data)
         if form.file.data:
@@ -337,7 +389,6 @@ def exportTest(test_id):
             
             flash("Тест успешно экспортирован", "success")
             return send_file(data, as_attachment=True, download_name=str(test_name + '.' +  form.export_type.data))
-            
         else:
             flash("Произошла ошибка при экспорте теста", "error")
             return redirect(url_for('showBanks'))
@@ -359,6 +410,33 @@ def deleteTest(test_id):
     else:
         flash("Ошибка при удалении теста", "error")
     return redirect (url_for('showBanks'))
+
+@app.route('/add_task/<test_id>', methods=["POST", "GET"])
+@login_required
+def addTask(test_id):
+    form = NumberOfQuestionsForm()
+    if form.validate_on_submit():
+        return redirect(url_for("addDataTask", number_of_questions = form.number_of_questions.data, test_id = test_id))
+    return render_template('add_task.html', test_id = test_id, form = form)
+
+@app.route('/add_data_task/<int:number_of_questions>/<test_id>', methods=["POST", "GET"])
+@login_required
+def addDataTask(number_of_questions, test_id):
+    form = AddTaskForm()
+    while len(form.answers) < number_of_questions:
+        form.answers.append_entry()
+
+    if form.validate_on_submit():
+        answers = []
+        for i in range(len(form.answers.entries)):
+            answers.append(Answer(form.answers.entries[i].data, False))
+        task = Task(form.question.data, answers)
+        if add_task_content(dbase, task, test_id):
+            flash("Задание успешно добавлено", "success")
+        else:
+            flash("Произошла ошибка при добавлении задания", "error")
+        return redirect(url_for("showTest", test_id = test_id))
+    return render_template('add_data_task.html', test_id = test_id, number_of_questions = number_of_questions, form = form)
 
 @app.route('/edit_task/<task_id>/<test_id>', methods=["POST", "GET"])
 @login_required

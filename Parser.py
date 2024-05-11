@@ -3,7 +3,6 @@ from TestClasses.Test import Test
 from TestClasses.Task import Task
 from TestClasses.Answer import Answer
 from TestClasses.Kit import Kit
-from Config import symbol_mode, key_mode, answer_under_question_mode
 
 # Обработка одного варианта шаблона Symbols
 def ParserForOneVariantSymbols(test_name : str, input_text : str, split_type : str) -> Test:
@@ -236,21 +235,25 @@ def ParserForAnswerUnderQuestion(test_name: str, task_text : str, kit: Kit, spli
 
 # Принимает имя теста(введено пользователем), текст для обработки,
 # набор в который добавятся тесты и input_mode(смотри Constants.py)
-def Parse(test_name : str, input_text : str, kit : Kit,  input_type : str, input_mode : str) -> None:
-    match input_mode:
-        case "handle":
-            match input_type:
-                case "symbol":
-                    ParserForSymbols(test_name, input_text, kit, "\\r\\n")
-                case "key":
-                    ParserForKeys(test_name, input_text, kit, "\\r\\n")
-                case "answer":
-                    ParserForAnswerUnderQuestion(test_name, input_text, kit, "\\r\\n")
-        case "file":
-            match input_type:
-                case "symbol":
-                    ParserForSymbols(test_name, input_text, kit, "\\n")
-                case "key":
-                    ParserForKeys(test_name, input_text, kit, "\\n")
-                case "answer":
-                    ParserForAnswerUnderQuestion(test_name, input_text, kit, "\\n")
+def Parse(test_name : str, input_text : str, kit : Kit,  input_type : str, input_mode : str) -> bool:
+    try:
+        match input_mode:
+            case "handle":
+                match input_type:
+                    case "symbol":
+                        ParserForSymbols(test_name, input_text, kit, "\\r\\n")
+                    case "key":
+                        ParserForKeys(test_name, input_text, kit, "\\r\\n")
+                    case "answer":
+                        ParserForAnswerUnderQuestion(test_name, input_text, kit, "\\r\\n")
+            case "file":
+                match input_type:
+                    case "symbol":
+                        ParserForSymbols(test_name, input_text, kit, "\\n")
+                    case "key":
+                        ParserForKeys(test_name, input_text, kit, "\\n")
+                    case "answer":
+                        ParserForAnswerUnderQuestion(test_name, input_text, kit, "\\n")
+    except:
+        return False
+    return True

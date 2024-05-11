@@ -82,12 +82,20 @@
     margin-top: 20px;
     font-size: 18px;
     line-height: 2;
+    margin-bottom: 12px;
   }
   
   .info_item {
     margin-left: 10px;
+    margin-right: 10px;
     margin-top: 5px;
     margin-bottom: 15px;
+  }
+
+
+  .add_task_info_item {
+    margin-top: 10px;
+    margin-bottom: 5px;
   }
   
   .kits {
@@ -110,6 +118,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .profile {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
   }
 
   .subkit {
@@ -198,13 +212,42 @@
   .new_bank_button {
     margin-left: 8%;
     margin-right: 8%;
-    
+    background-color: rgba(66, 96, 126);
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
   }
 
   .add_answer_button {
     background-color: rgba(66, 96, 126);
     color: #fff;
     padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .add_task_button {
+    background-color: rgba(66, 96, 126);
+    color: #fff;
+    padding: 12px 20px;
+    margin-left: 12px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .add_avatar_button {
+    background-color: rgba(66, 96, 126);
+    color: #fff;
+    padding: 10px 20px;
+    margin-top: 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
