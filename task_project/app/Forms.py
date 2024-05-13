@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, PasswordField, FileField, SelectField, IntegerField, FieldList
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 from wtforms.widgets import TextArea
-from flask_wtf.file import FileField, FileAllowed, FileRequired
+from flask_wtf.file import FileField, FileAllowed
 from Config import symbol_mode, key_mode, answer_under_question_mode, XML_mode, IMS_QTI_mode
 
 class UploadAvatarForm(FlaskForm):

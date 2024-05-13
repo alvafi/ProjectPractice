@@ -1,7 +1,8 @@
 import os
 from flask import Flask, flash, request, redirect, url_for, g, render_template, send_file, make_response
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from Config import db_name, hanle_input, file_input
+from Config import hanle_input, file_input
+from DB_Config import POSTGRES_DB
 from database import Database
 from Forms import RegisterForm, LoginForm, AddTestForm, AddTestToExistingKitForm, AddBankForm, ChangeName, ExportTestForm, ChangeAnswerForm, UploadAvatarForm, NumberOfQuestionsForm, AddTaskForm, ChangeUserNameForm
 from werkzeug.utils import secure_filename
@@ -15,7 +16,7 @@ from TestClasses.Answer import Answer
 from Interface import add_kit_content, delete_bank, delete_kit, edit_bank_name, edit_kit_name, edit_test_name, delete_test, add_kit_content_to_existing_kit, delete_task, edit_task_question, edit_answer, delete_answer, add_answer, resize_image, add_task_content
 from Export import Export
 
-DATABASE = f'/tmp/{db_name}.db'
+DATABASE = f'/tmp/{POSTGRES_DB}.db'
 DEBUG = True
 ALLOWED_EXTENSIONS = set(['txt', 'pdf'])
 SECRET_KEY = 'fc67934b56faafe32815'
@@ -26,7 +27,7 @@ UPLOAD_FOLDER = 'uploads'
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config.update(dict(DATABASE=os.path.join(app.root_path, f'{db_name}.db')))
+app.config.update(dict(DATABASE=os.path.join(app.root_path, f'{POSTGRES_DB}.db')))
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -511,4 +512,4 @@ def deleteAnswer(answer_id, task_id, test_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port="8080", debug=True)

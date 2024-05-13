@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as ET
-from io import BytesIO
 import io
 
 def MakeXML(dbase, test_id):

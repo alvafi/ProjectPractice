@@ -1,7 +1,3 @@
-from TestClasses.Answer import Answer
-from TestClasses.Test import Test
-from User import User
-from TestClasses.Bank import Bank
 from TestClasses.Task import Task
 from TestClasses.Kit import Kit
 from database import Database

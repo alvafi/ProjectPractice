@@ -1,0 +1,9 @@
+Flask
+Flask-Login
+wtforms
+flask-wtf
+werkzeug
+psycopg2-binary
+lxml
+Pillow
+email_validator

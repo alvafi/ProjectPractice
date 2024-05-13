@@ -56,13 +56,25 @@
                 </details>
               {% endfor %}
     {% else %}
-      <p class="kit_name">Пока здесь пусто</p>
+    <div class="kits">
+      <summary class="kit_empty">
+        <div class="name_kit">
+          <p class="kits_item"> Пока здесь пусто</p>
+        </div>
+      </summary>
+  </div>
     {% endif %}
   </details>
   </div>
   {% endfor %}
   {% else %}
-    <p class="kits">Пока здесь пусто</p>
+    <div class="kits">
+        <summary class="kit_empty">
+          <div class="name_kit">
+            <p class="kits_item"> Пока здесь пусто</p>
+          </div>
+        </summary>
+    </div>
   {% endif %}
   <a href="{{ url_for('addBank')}}" class="new_bank_button">Новый набор</a>
   </div>
