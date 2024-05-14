@@ -7,7 +7,6 @@ from TestClasses.Kit import Kit
 # Обработка одного варианта шаблона Symbols
 def ParserForOneVariantSymbols(test_name : str, input_text : str, split_type : str) -> Test:
     test = Test(test_name)
-
     text_of_tasks = re.split(str(split_type + split_type + '+'), input_text)
     text_of_tasks = list(filter(lambda x: x not in ['', ' '], text_of_tasks))
     for task_text in text_of_tasks:
@@ -45,7 +44,6 @@ def ParserForOneVariantSymbols(test_name : str, input_text : str, split_type : s
 # Обработка варинтов шаблона Symbols
 def ParserForSymbols(test_name: str,  task_text : str, kit: Kit, split_type : str) -> None:
     task_text = re.split(r'Вариант\s*\d+', task_text)
-    print(task_text)
     task_text = list(filter(lambda x: x not in ['', ' '], task_text))
     if len(task_text) == 1:
         kit.AddTest(ParserForOneVariantSymbols(test_name, task_text[0], split_type))
@@ -58,56 +56,61 @@ def ParserForSymbols(test_name: str,  task_text : str, kit: Kit, split_type : st
 def ParserForOneVariantKeys(test_name : str, input_text : str, keys : dict[int : str], split_type) -> Test:
     test = Test(test_name)
     text_of_tasks = re.split(str(split_type + split_type + '+'), input_text)
-    print(text_of_tasks)
     text_of_tasks = list(filter(lambda x: x not in ['', ' '], text_of_tasks))
-    print(text_of_tasks)
     for text_of_task in text_of_tasks:
         splited_task = re.split(split_type, text_of_task)
         splited_task = list(filter(lambda x: x not in ['', ' '], splited_task))
         answers = []
 
         # получаем номер задания
-        head_of_task = re.match('(\d+\.) (.*)', splited_task[0])
-        if head_of_task:
-            number_of_task = int(head_of_task.group(1)[:-1])
-            text_of_head = head_of_task.group(2)
-        else:
-            number_of_task = None
-            text_of_head = splited_task[0].strip()
-
-        for i in range(1, len(splited_task)):
-            match = re.match('^(\w+\)) (.*)', splited_task[i]) # ищем букву ответа
-            if not match:
-                answers.append(Answer(splited_task[i], False))
-                continue
-
-            if number_of_task and match.group(1)[:-1] in keys[number_of_task]:
-                answers.append(Answer(match.group(2), True))
+        if splited_task:
+            head_of_task = re.match('(\d+\.) (.*)', splited_task[0])
+            if head_of_task:
+                number_of_task = int(head_of_task.group(1)[:-1])
+                text_of_head = head_of_task.group(2)
             else:
-                answers.append(Answer(match.group(2), False))
+                number_of_task = None
+                text_of_head = splited_task[0].strip()
+            for i in range(1, len(splited_task)):
+                match = re.match('^(\w+\)) (.*)', splited_task[i]) # ищем букву ответа
+                if not match:
+                    answers.append(Answer(splited_task[i], False))
+                    continue
+                if number_of_task and number_of_task in keys and match.group(1)[:-1] in keys[number_of_task]:
+                    answers.append(Answer(match.group(2), True))
+                else:
+                    answers.append(Answer(match.group(2), False))
 
         test.AddTask(Task(text_of_head, answers))
     return test
 
 # Обработка ключей шаблона keys
 def GetKeys(keys_text : str, split_type) -> list[dict[int : str]]:
-    for i in range(len(keys_text)): # ищем первую цифру чтобы начать с нее
-        if keys_text[i].isdigit():
+    keys_text = re.split(str(split_type + '+'), keys_text)
+    for i in range(len(keys_text)):
+        if len(keys_text[i]) == 3:
             keys_text = keys_text[i:]
             break
-
-    keys_text = re.split(str(split_type + '+'), keys_text)
     keys = []
     key_dict = {}
     for i in range(len(keys_text)):
-        keys_text[i] = keys_text[i].split()
-        task_num = int(keys_text[i][0])
-        key_value = keys_text[i][1]
-        if task_num not in key_dict:
-             key_dict[task_num] = key_value
-        else:
-            keys.append(key_dict)
-            key_dict = {task_num : key_value}
+        if 0 < len(keys_text[i].strip()):
+            # Обработка стыков
+            if 2 < len(keys_text[i].split()):
+                data = keys_text[i].split()
+                key_dict[int(data[0])] = data[1]
+                keys.append(key_dict)
+                key_dict = {int(data[2]): data[3]}
+            else:
+                keys_text[i] = keys_text[i].split()
+                task_num = int(keys_text[i][0])
+                key_value = keys_text[i][1]
+                if task_num not in key_dict:
+                    key_dict[task_num] = key_value
+                else:
+                    keys.append(key_dict)
+                    key_dict = {task_num : key_value}
+
     keys.append(key_dict)
     return keys
 
@@ -149,7 +152,6 @@ def GetKeys(keys_text : str, split_type) -> list[dict[int : str]]:
 def ParserForKeys(test_name : str, file_text : str, kit : Kit, split_type) -> None:
     last_occurrence = max(file_text.rfind("Ключ"), file_text.rfind("ключ"))
     task_text = re.split(r'Вариант\s*\d+', file_text[:last_occurrence])
-    print(task_text)
     task_text = list(filter(lambda x: x not in ['', ' '], task_text))
 
     keys_text = file_text[last_occurrence:]
