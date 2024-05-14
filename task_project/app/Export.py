@@ -79,4 +79,3 @@ def Export(dbase, test_id, export_mode):
             return MakeXML(dbase, test_id)
         case "qti":
             return MakeQti(dbase, test_id)
-        

@@ -9,10 +9,10 @@ def ParserForOneVariantSymbols(test_name : str, input_text : str, split_type : s
     test = Test(test_name)
 
     text_of_tasks = re.split(str(split_type + split_type + '+'), input_text)
-    text_of_tasks = list(filter(lambda x: x != '', text_of_tasks))
+    text_of_tasks = list(filter(lambda x: x not in ['', ' '], text_of_tasks))
     for task_text in text_of_tasks:
         splited_task = re.split(split_type, task_text)
-        splited_task = list(filter(lambda x: x != '', splited_task))
+        splited_task = list(filter(lambda x: x not in ['', ' '], splited_task))
         answers = []
         for i in range(1, len(splited_task)):
             if re.match('[*#]',splited_task[i]):
@@ -45,7 +45,8 @@ def ParserForOneVariantSymbols(test_name : str, input_text : str, split_type : s
 # Обработка варинтов шаблона Symbols
 def ParserForSymbols(test_name: str,  task_text : str, kit: Kit, split_type : str) -> None:
     task_text = re.split(r'Вариант\s*\d+', task_text)
-    task_text = list(filter(lambda x: x != '', task_text))
+    print(task_text)
+    task_text = list(filter(lambda x: x not in ['', ' '], task_text))
     if len(task_text) == 1:
         kit.AddTest(ParserForOneVariantSymbols(test_name, task_text[0], split_type))
         return
@@ -57,10 +58,12 @@ def ParserForSymbols(test_name: str,  task_text : str, kit: Kit, split_type : st
 def ParserForOneVariantKeys(test_name : str, input_text : str, keys : dict[int : str], split_type) -> Test:
     test = Test(test_name)
     text_of_tasks = re.split(str(split_type + split_type + '+'), input_text)
-    text_of_tasks = list(filter(lambda x: x != '', text_of_tasks))
+    print(text_of_tasks)
+    text_of_tasks = list(filter(lambda x: x not in ['', ' '], text_of_tasks))
+    print(text_of_tasks)
     for text_of_task in text_of_tasks:
         splited_task = re.split(split_type, text_of_task)
-        splited_task = list(filter(lambda x: x != '', splited_task))
+        splited_task = list(filter(lambda x: x not in ['', ' '], splited_task))
         answers = []
 
         # получаем номер задания
@@ -125,7 +128,7 @@ def GetKeys(keys_text : str, split_type) -> list[dict[int : str]]:
 # <пробел не обязателен>
 # 1. Вопрос1
 # а) Ответ1
-# б )Ответ2
+# б) Ответ2
 # в) Ответ3
 # <пробел обязателен>
 # 2. Вопрос2
@@ -146,7 +149,8 @@ def GetKeys(keys_text : str, split_type) -> list[dict[int : str]]:
 def ParserForKeys(test_name : str, file_text : str, kit : Kit, split_type) -> None:
     last_occurrence = max(file_text.rfind("Ключ"), file_text.rfind("ключ"))
     task_text = re.split(r'Вариант\s*\d+', file_text[:last_occurrence])
-    task_text = list(filter(lambda x: x != '', task_text))
+    print(task_text)
+    task_text = list(filter(lambda x: x not in ['', ' '], task_text))
 
     keys_text = file_text[last_occurrence:]
     keys = GetKeys(keys_text, split_type)
@@ -163,10 +167,10 @@ def ParserForKeys(test_name : str, file_text : str, kit : Kit, split_type) -> No
 def ParserForOneVariantAnswerUnderQuestion(test_name : str, input_text : str, split_type) -> Test:
     test = Test(test_name)
     text_of_tasks = re.split(str(split_type + split_type + '+'), input_text)
-    text_of_tasks = list(filter(lambda x: x != '', text_of_tasks))
+    text_of_tasks = list(filter(lambda x: x not in ['', ' '], text_of_tasks))
     for task_text in text_of_tasks:
         splited_task = re.split(split_type, task_text)
-        splited_task = list(filter(lambda x: x != '', splited_task))
+        splited_task = list(filter(lambda x: x not in ['', ' '], splited_task))
 
         # Получаем ответы
         task_answers = []
@@ -190,8 +194,6 @@ def ParserForOneVariantAnswerUnderQuestion(test_name : str, input_text : str, sp
                             answer_text = text_of_answer[y:]
                             break
                     break
-            print(num)
-            print(task_answers)
             if num in task_answers:
                 answers.append(Answer(answer_text.strip(), True))
             else:
@@ -225,35 +227,25 @@ def ParserForOneVariantAnswerUnderQuestion(test_name : str, input_text : str, sp
 # Обработка вариантов AnswerUnderQuestion
 def ParserForAnswerUnderQuestion(test_name: str, task_text : str, kit: Kit, split_type) -> None:
     task_text = re.split(r'Вариант\s*\d+', task_text)
-    task_text = list(filter(lambda x: x != '', task_text))
+    task_text = list(filter(lambda x: x not in ['', ' '], task_text))
     if len(task_text) == 1:
         kit.AddTest(ParserForOneVariantAnswerUnderQuestion(test_name, task_text[0], split_type))
         return
     for variant in range(len(task_text)):
-        kit.AddTest(ParserForOneVariantAnswerUnderQuestion(test_name + ' вариант ' + str(variant), task_text[variant], split_type))
+        kit.AddTest(ParserForOneVariantAnswerUnderQuestion(test_name + ' вариант ' + str(variant + 1), task_text[variant], split_type))
 
 
 # Принимает имя теста(введено пользователем), текст для обработки,
 # набор в который добавятся тесты и input_mode(смотри Constants.py)
-def Parse(test_name : str, input_text : str, kit : Kit,  input_type : str, input_mode : str) -> bool:
+def Parse(test_name : str, input_text : str, kit : Kit,  input_type : str, split_type : str) -> bool:
     try:
-        match input_mode:
-            case "handle":
-                match input_type:
-                    case "symbol":
-                        ParserForSymbols(test_name, input_text, kit, "\\r\\n")
-                    case "key":
-                        ParserForKeys(test_name, input_text, kit, "\\r\\n")
-                    case "answer":
-                        ParserForAnswerUnderQuestion(test_name, input_text, kit, "\\r\\n")
-            case "file":
-                match input_type:
-                    case "symbol":
-                        ParserForSymbols(test_name, input_text, kit, "\\n")
-                    case "key":
-                        ParserForKeys(test_name, input_text, kit, "\\n")
-                    case "answer":
-                        ParserForAnswerUnderQuestion(test_name, input_text, kit, "\\n")
+        match input_type:
+            case "symbol":
+                ParserForSymbols(test_name, input_text, kit, split_type)
+            case "key":
+                ParserForKeys(test_name, input_text, kit, split_type)
+            case "answer":
+                ParserForAnswerUnderQuestion(test_name, input_text, kit, split_type)
     except:
         return False
     return True

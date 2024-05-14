@@ -11,7 +11,16 @@
 			{{ form.hidden_tag() }}
 			{% for field in form if field.name not in ['csrf_token', 'submit'] -%}
 				<p>{{ field.label() }} 
-				{{ field() }}
+				{% if field.errors %}
+					{{ field(class="invalid") }}
+					<span class="invalid-feedback">
+						{% for e in field.errors %}
+							{{ e }}
+						{% endfor %}
+					</span>
+				{% else %}
+					{{ field() }}
+				{% endif %}
 			{% endfor %}
 			<p>{{ form.submit() }}</p>
 			<a href="{{url_for('register')}}">Регистрация</a>

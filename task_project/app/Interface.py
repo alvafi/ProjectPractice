@@ -3,6 +3,8 @@ from TestClasses.Kit import Kit
 from database import Database
 from random import sample
 from PIL import Image
+import PyPDF2
+import docx2txt
 
 # Создание теста для уже существующих заданий
 def make_test(dbase, kit_id, test_name: str, task_amount: int):
@@ -35,7 +37,6 @@ def make_test(dbase, kit_id, test_name: str, task_amount: int):
 def add_bank(dbase, user_id, bank_name: str):
     bank_id, error = dbase.add_data_bank(user_id, bank_name)
     if bank_id is None:
-        print(error)
         return False
 
     return bank_id
@@ -189,7 +190,6 @@ def delete_kit(dbase, kit_id):
 def edit_bank_name(dbase, bank_id: int, new_bank_name: str):
     is_updated, error = dbase.update_bank_name(bank_id, new_bank_name)
     if not is_updated:
-        print(error)
         return False
     return True
 
@@ -197,7 +197,6 @@ def edit_bank_name(dbase, bank_id: int, new_bank_name: str):
 def edit_kit_name(dbase, kit_id: int, new_kit_name: str):
     is_updated, error = dbase.update_kit_name(kit_id, new_kit_name)
     if not is_updated:
-        print(error)
         return False
     return True
 
@@ -205,7 +204,6 @@ def edit_kit_name(dbase, kit_id: int, new_kit_name: str):
 def edit_test_name(dbase, test_id: int, new_test_name: str):
     is_updated, error = dbase.update_test_name(test_id, new_test_name)
     if not is_updated:
-        print(error)
         return False
     return True
 
@@ -213,7 +211,6 @@ def edit_test_name(dbase, test_id: int, new_test_name: str):
 def edit_task_question(dbase, task_id: int, new_task_question: str):
     is_updated, error = dbase.update_task_question(task_id, new_task_question)
     if not is_updated:
-        print(error)
         return False
     return True
 
@@ -221,7 +218,6 @@ def edit_task_question(dbase, task_id: int, new_task_question: str):
 def edit_answer(dbase, answer_id: int, new_answer_text: str, new_is_right: bool):
     is_updated, error = dbase.update_answer(answer_id, new_answer_text, new_is_right)
     if not is_updated:
-        print(error)
         return False
     return True
 
@@ -229,7 +225,6 @@ def edit_answer(dbase, answer_id: int, new_answer_text: str, new_is_right: bool)
 def delete_user(dbase, user_id: int):
     is_deleted, error = dbase.delete_data_user(user_id)
     if not is_deleted:
-        print(error)
         return False
 
     return True
@@ -238,7 +233,6 @@ def delete_user(dbase, user_id: int):
 def delete_bank(dbase, bank_id: int):
     is_deleted, error = dbase.delete_data_bank(bank_id)
     if not is_deleted:
-        print(error)
         return False
 
     return True
@@ -247,7 +241,6 @@ def delete_bank(dbase, bank_id: int):
 def delete_kit(dbase, kit_id: int):
     is_deleted, error = dbase.delete_data_kit(kit_id)
     if not is_deleted:
-        print(error)
         return False
 
     return True
@@ -256,7 +249,6 @@ def delete_kit(dbase, kit_id: int):
 def delete_test(dbase, test_id: int):
     is_deleted, error = dbase.delete_data_test(test_id)
     if not is_deleted:
-        print(error)
         return False
 
     return True
@@ -265,7 +257,6 @@ def delete_test(dbase, test_id: int):
 def delete_task(dbase, task_id: int):
     is_deleted, error = dbase.delete_data_task(task_id)
     if not is_deleted:
-        print(error)
         return False
 
     return True
@@ -274,7 +265,6 @@ def delete_task(dbase, task_id: int):
 def delete_answer(dbase, answer_id: int):
     is_deleted, error = dbase.delete_data_answer(answer_id)
     if not is_deleted:
-        print(error)
         return False
 
     return True
@@ -284,3 +274,24 @@ def resize_image(input_image_path, output_image_path):
     original_image = Image.open(input_image_path)
     resized_image = original_image.resize((60, 60))
     resized_image.save(output_image_path)
+
+
+def get_input_data(file_path, filename):
+    file_extension = filename.split('.')[-1]
+    match file_extension:
+        case "txt":
+            with open((file_path), 'r', encoding='utf8') as file:
+                input = file.read()
+            split_type = "\\n"
+        case "pdf":
+            with open(file_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                input = ""
+                for page_num in range(len(pdf_reader.pages)):
+                    page = pdf_reader.pages[page_num]
+                    input += page.extract_text()
+            split_type = " \\n"
+        case "docx":
+            input = docx2txt.process(file_path)
+            split_type = "\\n\\n"
+    return input, split_type

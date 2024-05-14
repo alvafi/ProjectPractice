@@ -93,7 +93,7 @@ class Database:
             self.__conn.commit()
 
         except sqlite3.Error as e:
-            return (False, str(e))
+            return (False, "Произошла ошибка при обработке формы")
 
         return (True, '')
     
@@ -195,7 +195,7 @@ class Database:
             ''', (email, user_id))
             self.__conn.commit()
         except sqlite3.Error as e:
-            return (False, str(e))
+            return (False, "Ошибка при обработке email")
         return (True, '')
     
     def update_user_login(self, user_id, login : str):
@@ -214,7 +214,7 @@ class Database:
             ''', (login, user_id))
             self.__conn.commit()
         except sqlite3.Error as e:
-            return (False, str(e))
+            return (False, "Ошибка при обработке login")
         return (True, '')
 
     def update_bank_name(self, bank_id: int, new_bank_name: str):
