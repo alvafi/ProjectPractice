@@ -34,7 +34,7 @@ class AddTestForm(FlaskForm):
     bank_id = SelectField("Загрузить в набор:", choices=[], validators=[DataRequired()])
     test_mode = SelectField("Формат теста:", choices=[(symbol_mode, "Символы"), (key_mode, "Ключи"), (answer_under_question_mode, "Ответы под вопросами")])
     name = StringField("Название:", validators=[DataRequired(), Length(min=1, max=20)])
-    text = StringField("Введите текст", widget=TextArea(), render_kw={"maxlength": "5000"})
+    text = StringField("Введите текст", widget=TextArea(), render_kw={"maxlength": "5000", "style": "width:500px; height:70px;"})
     file = FileField("Загрузить файл", validators=[FileAllowed(['txt', 'pdf', 'docx'],  message="not_type")])
     submit = SubmitField("Добавить")
 
@@ -45,7 +45,7 @@ class AddTestForm(FlaskForm):
 class AddTestToExistingKitForm(FlaskForm):
     test_mode = SelectField("Формат теста:", choices=[(symbol_mode, "Символы"), (key_mode, "Ключи"), (answer_under_question_mode, "Ответы под вопросами")])
     name = StringField("Название:", validators=[DataRequired(), Length(min=1, max=20)])
-    text = StringField("Введите текст", widget=TextArea(), render_kw={"maxlength": "3700"})
+    text = StringField("Введите текст", widget=TextArea(), render_kw={"maxlength": "5000", "style": "width:500px; height:70px;"})
     file = FileField("Загрузить файл", validators=[FileAllowed(['txt', 'pdf', 'docx'],  message="not_type")])
     submit = SubmitField("Добавить")
 

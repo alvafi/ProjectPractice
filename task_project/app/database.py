@@ -464,7 +464,7 @@ class Database:
     def get_banks_by_id(self, user_id):
         try:
             cur = self.__conn.cursor()
-            cur.execute(f"SELECT bank_id, bank_name FROM Bank WHERE user_id = {user_id}")
+            cur.execute(f"SELECT bank_id, bank_name FROM Bank WHERE user_id = {user_id}  ORDER BY bank_id")
             res = cur.fetchall()
             if not res:
                 return False
@@ -479,7 +479,7 @@ class Database:
     def get_kits_by_bank_id(self, bank_id):
         try:
             cur = self.__conn.cursor()
-            cur.execute(f"SELECT kit_id, kit_name FROM Kit WHERE bank_id = {bank_id}")
+            cur.execute(f"SELECT kit_id, kit_name FROM Kit WHERE bank_id = {bank_id}  ORDER BY kit_id")
             res = cur.fetchall()
             if not res:
                 return False
@@ -495,7 +495,7 @@ class Database:
     def get_tests_by_kit_id(self, kit_id):
         try:
             cur = self.__conn.cursor()
-            cur.execute(f"SELECT test_id, test_name FROM Test WHERE kit_id = {kit_id}")
+            cur.execute(f"SELECT test_id, test_name FROM Test WHERE kit_id = {kit_id} ORDER BY test_id")
             res = cur.fetchall()
             if not res:
                 return False
@@ -510,7 +510,7 @@ class Database:
     def get_kit_id_by_test_id(self, test_id):
         try:
             cur = self.__conn.cursor()
-            cur.execute(f"SELECT kit_id FROM Test WHERE test_id = {test_id} LIMIT 1")
+            cur.execute(f"SELECT kit_id FROM Test WHERE test_id = {test_id} LIMIT 1 ORDER BY kit_id")
             res = cur.fetchall()
             if not res:
                 return False
@@ -540,7 +540,7 @@ class Database:
     def get_tasks_by_kit_id_where_test_id_is_null(self, kit_id):
         try:
             cur = self.__conn.cursor()
-            cur.execute(f"SELECT task_id, question_text FROM Task WHERE kit_id = {kit_id} AND test_id is NULL")
+            cur.execute(f"SELECT task_id, question_text FROM Task WHERE kit_id = {kit_id} AND test_id is NULL ORDER BY task_id")
             res = cur.fetchall()
             if not res:
                 return False
@@ -555,7 +555,7 @@ class Database:
     def get_answers_by_task_id(self, task_id):
         try:
             cur = self.__conn.cursor()
-            cur.execute(f"SELECT answer_id, answer_text, is_right FROM Answer WHERE task_id = {task_id}")
+            cur.execute(f"SELECT answer_id, answer_text, is_right FROM Answer WHERE task_id = {task_id} ORDER BY answer_id")
             res = cur.fetchall()
             if not res:
                 return False

@@ -76,6 +76,7 @@ def ParserForOneVariantKeys(test_name : str, input_text : str, keys : dict[int :
                 if not match:
                     answers.append(Answer(splited_task[i], False))
                     continue
+
                 if number_of_task and number_of_task in keys and match.group(1)[:-1] in keys[number_of_task]:
                     answers.append(Answer(match.group(2), True))
                 else:
@@ -238,7 +239,7 @@ def ParserForAnswerUnderQuestion(test_name: str, task_text : str, kit: Kit, spli
 
 
 # Принимает имя теста(введено пользователем), текст для обработки,
-# набор в который добавятся тесты и input_mode(смотри Constants.py)
+# набор в который добавятся тесты, input_type и split_type
 def Parse(test_name : str, input_text : str, kit : Kit,  input_type : str, split_type : str) -> bool:
     try:
         match input_type:
