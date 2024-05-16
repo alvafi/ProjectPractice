@@ -510,7 +510,7 @@ class Database:
     def get_kit_id_by_test_id(self, test_id):
         try:
             cur = self.__conn.cursor()
-            cur.execute(f"SELECT kit_id FROM Test WHERE test_id = {test_id} LIMIT 1 ORDER BY kit_id")
+            cur.execute(f"SELECT kit_id FROM Test WHERE test_id = {test_id}  ORDER BY kit_id LIMIT 1")
             res = cur.fetchall()
             if not res:
                 return False
@@ -524,7 +524,7 @@ class Database:
             if test_id is None:
                 cur.execute(f"SELECT task_id, question_text FROM Task WHERE test_id IS NULL")
             else:
-                cur.execute(f"SELECT task_id, question_text FROM Task WHERE test_id = {test_id}")
+                cur.execute(f"SELECT task_id, question_text FROM Task WHERE test_id = {test_id} ORDER BY task_id")
 
             res = cur.fetchall()
             if not res:
