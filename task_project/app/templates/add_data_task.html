@@ -1,0 +1,53 @@
+{% extends 'base_menu.html' %}
+
+{% block content %}
+{{ super() }}
+{% for cat, msg in get_flashed_messages(True) %}
+	<div class="flash {{cat}}">{{msg}}</div>
+{% endfor %}
+<body>
+	<div class="main">
+		<div class="container">
+			<div class="info">		
+				<form action="{{url_for('addDataTask', number_of_questions = number_of_questions, test_id = test_id)}}" method="post" enctype="multipart/form-data">
+					<h3 class="info_item">Введите вопрос и ответы</h3>
+					{{ form.hidden_tag() }}
+					{% for field in form if field.name not in ['csrf_token', 'submit', 'is_right'] -%}
+						{% if field.name not in ['answers', ] %}
+							<p class="info_item">{{ field.label() }}</p>
+						{% endif %} 
+						{% if field.errors %}
+							{{ field(class="invalid") }}
+							{% if 'not_type' not in field.errors %}
+								<span class="invalid-feedback">
+								{% for e in field.errors %}
+									<p class="info_item">{{ e }}</p>
+								{% endfor %}
+								</span>
+							{% endif %}
+						{% else %}
+                            {% if field.name == 'answers' %}
+								{% set count = namespace(i=0) %}
+                                {% for entry in field.entries %}
+									<div class="container">
+										<div class="info">
+											<p class="info_item">{{ entry.label() }} {{ count.i + 1 }}: {{ entry() }}</p>
+										</div>
+									</div>
+									{% set count.i = count.i + 1 %}
+                                {% endfor %}
+                            {% else %}
+								<p class="info_item">{{ field() }}</p>
+                            {% endif %}
+						{% endif %}
+					{% endfor %}
+					<p class="info_item">{{ form.submit() }}
+					<a href="{{ url_for('addTask', test_id = test_id) }}" class="add_task_button">Назад</a></p>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+
+	
+{% endblock %}

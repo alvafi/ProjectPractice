@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+{% for cat, msg in get_flashed_messages(True) %}
+	<div class="flash {{cat}}">{{msg}}</div>
+{% endfor %}
+<body>
+	<div class="container">
+		<div class="info">
+			<summary class="profile">
+				<p><h3>{{ current_user.GetLastName() }} {{ current_user.GetFirstName() }} {{ current_user.GetMiddleName() }}</h3></p>
+				<div class="menu">
+					<a href="{{ url_for('changeName') }}" class="kits_item"><img src="{{ url_for('static', filename='images/pen-solid.png') }}" alt=""></a>
+				</div>
+			</summary>
+
+			<summary class="profile">
+					<p>Электронная почта: {{ current_user.GetEmail() }}</p>
+				<div class="menu">
+					<a href="{{ url_for('changeEmail') }}" class="kits_item"><img src="{{ url_for('static', filename='images/pen-solid.png') }}" alt=""></a>
+				</div>
+			</summary>
+
+			<summary class="profile">
+				<p>Логин: {{ current_user.GetLogin() }}</p>
+				<div class="menu">
+					<a href="{{ url_for('changeLogin') }}" class="kits_item"><img src="{{ url_for('static', filename='images/pen-solid.png') }}" alt=""></a>
+				</div>
+			</summary>
+			<a href="{{ url_for('uploadAvatar') }}" class="add_avatar_button"> Загрузить аватар</a>
+		</div>
+	</div>
+</body>
+{% endblock %}

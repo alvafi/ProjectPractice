@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:13.3
+    expose:
+      - 5432
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./app/DB_Config.py
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
