@@ -6,6 +6,9 @@
   <title>TaskBank</title>
   <link type = "text/css" rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   </link>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Krona+One&family=Mina&display=swap" rel="stylesheet">
   <script src="{{ url_for('static', filename='js/script.js')}}"></script>
 </head>
 
@@ -13,8 +16,8 @@
 {% block content %}
   <div id="mySidenav" class="sidenav">
     <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-    <a href="{{ url_for('showBanks') }}">Мои наборы</a>
-    <a href="{{url_for('profile')}}">Личный кабинет</a>
+    <a href="{{ url_for('showBanks') }}" class="mina">Мои наборы</a>
+    <a href="{{url_for('profile')}}" class="mina">Личный кабинет</a>
   </div>
 
   <header>
@@ -34,7 +37,7 @@
             {% else %}
               <a href="" class="account_item"><img src="{{ url_for('static', filename='images/User_cicrle_duotone.png') }}" alt=""></a>
             {% endif %}
-              <a href="{{url_for('logout')}}">Выход</a>
+              <a href="{{url_for('logout')}}" class="mina">Выход</a>
             {% else %}
               <a class="account_item" href="{{url_for('login')}}">Войти</a>
               <a class="account_item" href="{{url_for('register')}}">Регистрация</a>

@@ -23,9 +23,9 @@
                     {% for answer_id, answer_text, is_right in answers %}
                         <summary class="task">
                             {% if is_right %}
-                                <p>{{ answer_text }}<img src="{{ url_for('static', filename='images/right.png') }}" alt=""> </p>
+                            <p>{{ answer_text }}<img src="{{ url_for('static', filename='images/right.png') }}" alt="" style="height: 16px; width: 16px; margin-left: 10px;"> </p>
                             {% else %}
-                                <p>{{ answer_text }}<img src="{{ url_for('static', filename='images/wrong.png') }}" alt=""></p>
+                            <p>{{ answer_text }}<img src="{{ url_for('static', filename='images/wrong.png') }}" alt="" style="height: 16px; width: 16px; margin-left: 10px;"></p>
                             {% endif %}
                             <div class="menu">
                                 <a href="{{ url_for('changeAnswer', answer_id = answer_id, test_id = test_id, task_id = task_id) }}" class="kits_item"><img src="{{ url_for('static', filename='images/pen-solid.png') }}" alt=""></a>
