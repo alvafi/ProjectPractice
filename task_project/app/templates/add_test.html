@@ -1,0 +1,36 @@
+{% extends 'base_menu.html' %}
+
+{% block content %}
+{{ super() }}
+{% for cat, msg in get_flashed_messages(True) %}
+	<div class="flash {{cat}}">{{msg}}</div>
+{% endfor %}
+<body>
+	<div class="main">
+		<div class="container">
+			<div class="info">		
+				<form action="{{url_for('addTest')}}" method="post" enctype="multipart/form-data">
+					<h3 class="info_item">Введите тест или загрузите файлом</h3>
+					{{ form.hidden_tag() }}
+					{% for field in form if field.name not in ['csrf_token', 'remember', 'submit'] -%}
+						<p class="info_item">{{ field.label() }} 
+						{% if field.errors %}
+							{{ field(class="invalid") }}
+							{% if 'not_type' not in field.errors %}
+								<span class="invalid-feedback">
+								{% for e in field.errors %}
+									{{ e }}
+								{% endfor %}
+								</span>
+							{% endif %}
+						{% else %}
+							{{ field() }}
+						{% endif %}
+					{% endfor %}
+					<p class="info_item">{{ form.submit() }}
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+{% endblock %}

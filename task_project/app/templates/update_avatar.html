@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+{% for cat, msg in get_flashed_messages(True) %}
+	<div class="flash {{cat}}">{{msg}}</div>
+{% endfor %}
+<body>
+	<div class="container">
+		<form action=""  method="post" enctype="multipart/form-data" class="container_registration">
+			{{ form.hidden_tag() }}
+			{% for field in form if field.name not in ['csrf_token', 'submit'] -%}
+				<p class="info_item">{{ field.label() }}</p>
+			
+					<p class="info_item">{{ field() }}</p>
+
+			{% endfor %}
+			<p class="info_item">{{ form.submit() }}</p>
+		</form>
+	</div>
+</body>
+{% endblock %}
