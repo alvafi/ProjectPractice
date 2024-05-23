@@ -17,8 +17,8 @@ Web-приложение предназначен для упрощения пр
 3. Экспорт тестовых заданий в ... форматы 
 
 ## Запуск
-Склонировать репозиторий с GitHub - https://github.com/alvafi/ProjectPractice
-Перейти в репозиторий с проектом - cd ProjectPractice
-Запустить скрипт - ./build.sh
-Перейдите по ссылке - http://127.0.0.1:8080/
+Склонировать репозиторий с GitHub - https://github.com/alvafi/ProjectPractice<br />
+Перейти в репозиторий с проектом - cd ProjectPractice<br />
+Запустить скрипт - ./build.sh<br />
+Перейдите по ссылке - http://127.0.0.1:8080/<br />
 
